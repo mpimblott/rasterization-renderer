@@ -9,6 +9,8 @@ add_executable(
   main.cpp
   vector.h
   vector.cpp
+  matrix.h
+  matrix.cpp
 )
 
 # include the external library at /external/stb_image.h

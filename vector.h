@@ -2,21 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
-
-//https://stackoverflow.com/q/44037870
-class Property
-{
-private:
-  float& t;
-public:
-    inline Property(float& a): t(a) {}
-
-    inline void Set(const float &a) { t = a; }
-    inline float& Get() { return t; }
-
-    operator float&() { return t; }
-    float &operator=(const float &a) { return t = a; }
-};
+#include "util.h"
 
 template <size_t SIZE>
 class Vec
@@ -26,10 +12,10 @@ public:
   size_t len();
   float &operator[](size_t i);
   const float &operator[](size_t i) const;
-  Vec<SIZE> operator+(Vec<SIZE> &v);
-  Vec<SIZE> operator-(Vec<SIZE> &v);
-  Vec<SIZE> operator*(float s);
-  Vec<SIZE> operator/(float s);
+  Vec<SIZE> operator+(Vec<SIZE> &v) const;
+  Vec<SIZE> operator-(Vec<SIZE> &v) const;
+  Vec<SIZE> operator*(float s) const;
+  Vec<SIZE> operator/(float s) const;
   float dot(Vec<SIZE> &v);
   Vec<SIZE> cross(Vec<SIZE> &v);
   Vec<SIZE> normalize();
