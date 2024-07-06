@@ -5,13 +5,17 @@
 #include "util.h"
 #include "vector.h"
 
-template <size_t WIDTH, size_t HEIGHT>
+template <typename T, size_t WIDTH, size_t HEIGHT>
 class Mat
 {
 public:
   Mat();
-  Vec<WIDTH> &operator[](size_t i);
+  Vec<T, WIDTH> &operator[](size_t i);
+  Mat<T, WIDTH, ARG_WIDTH> mult(Mat<T, HEIGHT, ARG_WIDTH> &m);
+  Vec<T, HEIGHT> col(size_t i);
 
 protected:
-  Vec<WIDTH> rows[HEIGHT];
+  Vec<T, WIDTH> rows[HEIGHT];
 };
+
+#include "matrix.cpp"

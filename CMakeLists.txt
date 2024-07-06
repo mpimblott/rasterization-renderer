@@ -8,9 +8,9 @@ add_executable(
   RasterizeRenderer
   main.cpp
   vector.h
-  vector.cpp
-  matrix.h
-  matrix.cpp
+  # vector.cpp
+  # matrix.h
+  # linalg.cpp
 )
 
 # include the external library at /external/stb_image.h

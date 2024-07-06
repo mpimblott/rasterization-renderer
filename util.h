@@ -1,16 +1,17 @@
 #pragma once
 
 //https://stackoverflow.com/q/44037870
+template <typename T>
 class Property
 {
 private:
-  float& t;
+  T& t;
 public:
-    inline Property(float& a): t(a) {}
+    inline Property(T& a): t(a) {}
 
-    inline void Set(const float &a) { t = a; }
-    inline float& Get() { return t; }
+    inline void Set(const T &a) { t = a; }
+    inline T& Get() { return t; }
 
-    operator float&() { return t; }
-    float &operator=(const float &a) { return t = a; }
+    operator T&() { return t; }
+    T &operator=(const T &a) { return t = a; }
 };
