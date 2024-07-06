@@ -3,6 +3,21 @@
 #include <cstdlib>
 #include <iostream>
 
+//https://stackoverflow.com/q/44037870
+class Property
+{
+private:
+  float& t;
+public:
+    inline Property(float& a): t(a) {}
+
+    inline void Set(const float &a) { t = a; }
+    inline float& Get() { return t; }
+
+    operator float&() { return t; }
+    float &operator=(const float &a) { return t = a; }
+};
+
 template <size_t SIZE>
 class Vec
 {
@@ -31,9 +46,28 @@ public:
     return os;
   }
 
-private:
+protected:
   float data[SIZE];
 };
 
-typedef Vec<2> Vec2;
-typedef Vec<3> Vec3;
+class Vec2: public Vec<2>
+{
+public:
+  Vec2();
+  Vec2(float x, float y);
+  Property x;
+  Property y;
+};
+
+class Vec3: public Vec<3>
+{
+public:
+  Vec3();
+  Vec3(float x, float y, float z);
+  Property x;
+  Property y;
+  Property z;
+};
+
+
+
