@@ -4,10 +4,7 @@ template <typename T, size_t WIDTH, size_t HEIGHT>
 Mat<T, WIDTH, HEIGHT>::Mat(std::initializer_list<Vec<T, WIDTH>> rows)
 {
   assert(rows.size() == HEIGHT && "Matrix initializer list has incorrect size.");
-  for (int j = 0; j < rows.size(); j++)
-  {
-    this->rows[j] = *(rows.begin() + j);
-  }
+  std::copy(rows.begin(), rows.end(), this->rows.begin());
 }
 
 template <typename T, size_t WIDTH, size_t HEIGHT>
@@ -48,7 +45,8 @@ Mat<T, WIDTH, ARG_WIDTH> Mat<T, WIDTH, HEIGHT>::mult(Mat<T, HEIGHT, ARG_WIDTH> &
   {
     for (int c = 0; c < WIDTH; c++)
     {
-      out[r, c] = rows[r].cross(m.col(c));
+      Vec<T, HEIGHT> col = m.col(c);
+      out[r][c] = rows[r].dot(col);
     }
   }
   return out;

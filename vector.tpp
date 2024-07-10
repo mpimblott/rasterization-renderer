@@ -10,11 +10,7 @@ template <typename T, size_t SIZE>
 Vec<T, SIZE>::Vec(std::initializer_list<T> v)
 {
   assert(v.size() == SIZE && "Vector initialzer list has incorrect size.");
-  // convert the initializer list to an array
-  for (int i = 0; i < SIZE; i++)
-  {
-    data[i] = *(v.begin() + i);
-  }
+  std::copy(v.begin(), v.end(), data.begin());
 }
 
 template <typename T, size_t SIZE>
@@ -91,10 +87,8 @@ VecF<SIZE>::VecF()
     this->data[i] = 0.0f;
 }
 
-Vec2::Vec2() : x(data[0]), y(data[1]){};
-
 Vec2::Vec2(float x, float y) : x(data[0]), y(data[1]) {}
 
-Vec3::Vec3() : x(data[0]), y(data[1]), z(data[2]){};
+// Vec3::Vec3() : x(data[0]), y(data[1]), z(data[2]){};
 
 Vec3::Vec3(float x, float y, float z) : x(data[0]), y(data[1]), z(data[2]) {}

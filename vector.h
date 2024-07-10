@@ -36,33 +36,34 @@ public:
   }
 
 protected:
-  std::array<T, SIZE> data = {};
+  std::array<T, SIZE> data;
 };
 
 template <size_t SIZE>
-class VecF: public Vec<float, SIZE>
+class VecF : public Vec<float, SIZE>
 {
 public:
   VecF();
+  using Vec<float, SIZE>::Vec;
 };
 
-class Vec2: public VecF<2>
+class Vec2 : public VecF<2>
 {
 public:
-  Vec2();
+  using VecF<2>::VecF;
   Vec2(float x, float y);
-  Property<float> x;
-  Property<float> y;
+  Property<float> x = this->data[0];
+  Property<float> y = this->data[1];
 };
 
-class Vec3: public VecF<3>
+class Vec3 : public VecF<3>
 {
 public:
-  Vec3();
+using VecF<3>::VecF;
   Vec3(float x, float y, float z);
-  Property<float> x;
-  Property<float> y;
-  Property<float> z;
+  Property<float> x = this->data[0];
+  Property<float> y = this->data[1];
+  Property<float> z = this->data[2];
 };
 
 #include "vector.tpp"
