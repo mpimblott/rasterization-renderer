@@ -1,10 +1,18 @@
 #include "matrix.h"
 
 template <typename T, size_t WIDTH, size_t HEIGHT>
-Mat<T, WIDTH, HEIGHT>::Mat(){};
+Mat<T, WIDTH, HEIGHT>::Mat(std::initializer_list<Vec<T, WIDTH>> rows)
+{
+  assert(rows.size() == HEIGHT && "Matrix initializer list has incorrect size.");
+  for (int j = 0; j < rows.size(); j++)
+  {
+    this->rows[j] = *(rows.begin() + j);
+  }
+}
 
 template <typename T, size_t WIDTH, size_t HEIGHT>
-Mat<T, WIDTH, HEIGHT>::Mat(Vec<T, WIDTH> rows[HEIGHT]){
+Mat<T, WIDTH, HEIGHT>::Mat(Vec<T, WIDTH> rows[HEIGHT])
+{
   this->rows = rows;
 };
 
@@ -38,7 +46,8 @@ Mat<T, WIDTH, ARG_WIDTH> Mat<T, WIDTH, HEIGHT>::mult(Mat<T, HEIGHT, ARG_WIDTH> &
   Mat<T, WIDTH, ARG_WIDTH> out;
   for (int r = 0; r < HEIGHT; r++)
   {
-    for (int c = 0; c < WIDTH; c++) {
+    for (int c = 0; c < WIDTH; c++)
+    {
       out[r, c] = rows[r].cross(m.col(c));
     }
   }

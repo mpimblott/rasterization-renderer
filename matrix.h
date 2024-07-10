@@ -1,7 +1,9 @@
 #pragma once
 
+#include <array>
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
 #include "util.h"
 #include "vector.h"
 
@@ -12,9 +14,9 @@ template <typename T, size_t WIDTH, size_t HEIGHT>
 class Mat
 {
 public:
-  Mat();
+  Mat() = default;
   Mat(Vec<T, WIDTH> rows[HEIGHT]);
-  // Mat(std::initializer_list<Vec<T, WIDTH>> rows) : Mat(rows) {}
+  Mat(std::initializer_list<Vec<T, WIDTH>> rows);
   Vec<T, WIDTH> &operator[](size_t i);
   const Vec<T, WIDTH> &operator[](size_t i) const;
   Vec<T, HEIGHT> col(size_t i);
@@ -34,7 +36,7 @@ public:
   }
 
 protected:
-  Vec<T, WIDTH> rows[HEIGHT];
+  std::array<Vec<T, WIDTH>, HEIGHT> rows = {};
 };
 
 #include "matrix.tpp"

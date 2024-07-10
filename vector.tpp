@@ -9,6 +9,7 @@ Vec<T, SIZE>::Vec(T (&v)[SIZE])
 template <typename T, size_t SIZE>
 Vec<T, SIZE>::Vec(std::initializer_list<T> v)
 {
+  assert(v.size() == SIZE && "Vector initialzer list has incorrect size.");
   // convert the initializer list to an array
   for (int i = 0; i < SIZE; i++)
   {

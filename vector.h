@@ -1,7 +1,9 @@
 #pragma once
 
+#include <array>
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
 #include "util.h"
 
 template <typename T, size_t SIZE>
@@ -34,7 +36,7 @@ public:
   }
 
 protected:
-  T data[SIZE];
+  std::array<T, SIZE> data = {};
 };
 
 template <size_t SIZE>
