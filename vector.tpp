@@ -1,6 +1,22 @@
 #include "vector.h"
 
 template <typename T, size_t SIZE>
+Vec<T, SIZE>::Vec(T (&v)[SIZE])
+{ // brackets to pass ref to array, rather than array of references
+  data = v;
+}
+
+template <typename T, size_t SIZE>
+Vec<T, SIZE>::Vec(std::initializer_list<T> v)
+{
+  // convert the initializer list to an array
+  for (int i = 0; i < SIZE; i++)
+  {
+    data[i] = *(v.begin() + i);
+  }
+}
+
+template <typename T, size_t SIZE>
 size_t Vec<T, SIZE>::len()
 {
   return SIZE;
@@ -78,6 +94,6 @@ Vec2::Vec2() : x(data[0]), y(data[1]){};
 
 Vec2::Vec2(float x, float y) : x(data[0]), y(data[1]) {}
 
-Vec3::Vec3() : x(data[0]), y(data[1]), z(data[2]) {};
+Vec3::Vec3() : x(data[0]), y(data[1]), z(data[2]){};
 
 Vec3::Vec3(float x, float y, float z) : x(data[0]), y(data[1]), z(data[2]) {}

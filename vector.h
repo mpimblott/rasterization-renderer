@@ -9,6 +9,8 @@ class Vec
 {
 public:
   Vec() = default;
+  Vec(T (&v)[SIZE]);
+  Vec(std::initializer_list<T> v);
   size_t len();
   T &operator[](size_t i);
   const T &operator[](size_t i) const;

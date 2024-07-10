@@ -9,7 +9,7 @@ add_executable(
   main.cpp
   vector.h
   # vector.cpp
-  # matrix.h
+  matrix.h
   # linalg.cpp
 )
 
