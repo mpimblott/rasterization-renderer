@@ -77,6 +77,25 @@ std::ostream &operator<<(std::ostream &os, const Vec<T, N> &v)
 }
 
 template <typename T, size_t N>
+std::ostream &operator<<(std::ostream &os, const Vec<Vec<T, N>, N> &m)
+{
+  os << "[";
+  for (size_t c = 0; c < N; c++)
+  {
+    for (size_t r = 0; r < N; r++)
+    {
+    os << m[r][c];
+    if (r < N - 1)
+      os << ",";
+    }
+    if (c < N - 1)
+      os << "\n ";
+  }
+  os << "]";
+  return os;
+}
+
+template <typename T, size_t N>
 Vec<T, N> operator*(typename V_traits<T>::element_type lhs, const Vec<T, N> &rhs)
 {
   Vec<T, N> out;
@@ -91,6 +110,28 @@ Vec<T, N> operator*(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs
   Vec<T, N> out;
   for (size_t i = 0; i < N; i++)
     out[i] = rhs * lhs[i];
+  return out;
+}
+
+template <typename T, size_t N>
+Vec<T, N> operator/(const Vec<T, N> & lhs, const T rhs)
+{
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
+  {
+    out[i] = lhs[i] / rhs;
+  }
+  return out;
+}
+
+template <typename T, size_t N>
+Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, const T rhs)
+{
+  Vec<Vec<T, N>, N> out;
+  for (size_t i = 0; i < N; i++)
+  {
+    out[i] = lhs[i] / rhs;
+  }
   return out;
 }
 
@@ -132,8 +173,8 @@ T minor(const Vec<Vec<T, N>, N> &m, size_t col, size_t row)
     }
     dst_col += 1;
   }
-  std::cout << "computed sub: " << "(" << col << ", " << row << ") res:" << det(tmp) << std::endl;
-  std::cout << tmp << std::endl;
+  // std::cout << "computed sub: " << "(" << col << ", " << row << ") res:" << det(tmp) << std::endl;
+  // std::cout << tmp << std::endl;
   return det(tmp);
 }
 
@@ -206,4 +247,26 @@ Vec<Vec<T, N>, M> transpose(const Vec<Vec<T, M>, N> &m)
     }
   }
   return out;
+}
+
+template <typename T, size_t N, size_t M>
+Vec<Vec<T, N>, M> adjoint(Vec<Vec<T, M>, N> &m)
+{
+  Vec<Vec<T, N>, M> out;
+  auto transp = transpose(m);
+  for (size_t c = 0; c < N; c++)
+  {
+    for (size_t r = 0; r < M; r++)
+    {
+      out[c][r] = cofactor(transp, c, r);
+    }
+  }
+  return out;
+}
+
+template <typename T, size_t N, size_t M>
+Vec<Vec<T, N>, M> inv(Vec<Vec<T, M>, N> &m)
+{
+  Vec<Vec<T, N>, M> out;
+
 }

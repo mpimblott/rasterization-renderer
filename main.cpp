@@ -15,8 +15,13 @@ int main()
   // std::cout << e << std::endl;
   // std::cout << det(e) << std::endl;
   // std::cout << e << std::endl;
-  Vec<Vec<float, 1>, 2> f = {{0}, {1}};
-  std::cout << f << std::endl;
+  // Vec<Vec<float, 1>, 2> f = {{0}, {1}};
   // std::cout << f << std::endl;
-  std::cout << transpose(f) << std::endl;
+  // std::cout << f << std::endl;
+  // std::cout << transpose(f) << std::endl;
+  // Matf3 A = {{1, 3, -1}, {-2, 1, 2}, {0, 5, 3}};
+  // std::cout << A << std::endl;
+  // std::cout << transpose(A) << std::endl;
+  // std::cout << adjoint(A) << std::endl;
+  std::cout << c << std::endl;
 }

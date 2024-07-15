@@ -35,10 +35,19 @@ template <typename T, size_t N>
 std::ostream &operator<<(std::ostream &os, const Vec<T, N> &v);
 
 template <typename T, size_t N>
+std::ostream &operator<<(std::ostream &os, const Vec<Vec<T, N>, N> &m);
+
+template <typename T, size_t N>
 Vec<T, N> operator*(typename V_traits<T>::element_type lhs, const Vec<T, N> &rhs);
 
 template <typename T, size_t N>
 Vec<T, N> operator*(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs);
+
+template <typename T, size_t N>
+Vec<T, N> operator/(const Vec<T, N> & lhs, const T rhs);
+
+template <typename T, size_t N>
+Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, const T rhs);
 
 template <typename T, size_t N>
 T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
@@ -67,9 +76,15 @@ Vec<Vec<T, 1>, N> transpose(const Vec<T, N> &v);
 template <typename T, size_t N>
 Vec<T, N> transpose(Vec<Vec<T, 1>, N> &m);
 
-// cols, rows
+// rows, cols
 template <typename T, size_t N, size_t M>
 Vec<Vec<T, N>, M> transpose(const Vec<Vec<T, M>, N> &m);
+
+template <typename T, size_t N, size_t M>
+Vec<Vec<T, N>, M> adjoint(Vec<Vec<T, M>, N> &m);
+
+template <typename T, size_t N, size_t M>
+Vec<Vec<T, N>, M> inv(Vec<Vec<T, M>, N> &m);
 
 template <typename T, size_t N>
 class Vec
@@ -84,10 +99,12 @@ public:
   size_t len();
   Vec<T, N> operator+(const Vec<T, N> &v) const;
   Vec<T, N> operator-(const Vec<T, N> &v) const;
-  // add <> to indicate referring to template function, but parameters should be deduced from environment
   friend std::ostream &operator<< <>(std::ostream &os, const Vec<T, N> &v);
+  friend std::ostream &operator<< <>(std::ostream &os, const Vec<Vec<T, N>, N> &m);
   friend Vec<T, N> operator* <>(typename V_traits<T>::element_type lhs, const Vec<T, N> &rhs);
   friend Vec<T, N> operator* <>(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs);
+  friend Vec<T, N> operator/ <>(const Vec<T, N> & lhs, const T rhs);
+  friend Vec<Vec<T, N>, N> operator/ <>(const Vec<Vec<T, N>, N> & lhs, const T rhs);
   friend T dot<>(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
   // Height, Width (rows, cols)
   // friend Vec<T, N> matmul<>(const Vec<Vec<T, N>, N> &lhs, const Vec<T, N> &rhs);
@@ -101,6 +118,7 @@ typedef Vec<float, 3> Vecf3;
 typedef Vec<Vec<float, 2>, 2> Matf2;
 typedef Vec<Vec<float, 3>, 3> Matf3;
 typedef Vec<Vec<float, 4>, 4> Matf4;
+typedef Vec<Vec<Vec<float, 2>, 2>, 2> D3Arrf2;
 
 const Vec<Vec<float, 2>, 2> I2 = {{1, 0}, {0, 1}};
 const Vec<Vec<float, 3>, 3> I3 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
