@@ -1,94 +1,209 @@
 #include "vector.h"
 
-template <typename T, size_t SIZE>
-Vec<T, SIZE>::Vec(T (&v)[SIZE])
+template <typename T, size_t N>
+Vec<T, N>::Vec(const T (&data)[N])
 { // brackets to pass ref to array, rather than array of references
-  data = v;
+  for (unsigned int i = 0; i < N; i++)
+  {
+    this->data[i] = data[i];
+  }
 }
 
-template <typename T, size_t SIZE>
-Vec<T, SIZE>::Vec(std::initializer_list<T> v)
+// template <typename T, size_t N>
+// Vec<T, N>::Vec(const Vec<T, N> &data)
+// { // brackets to pass ref to array, rather than array of references
+//   for (unsigned int i = 0; i < N; i++)
+//   {
+//     this->data[i] = data[i];
+//   }
+// }
+
+template <typename T, size_t N>
+Vec<T, N>::Vec(std::initializer_list<T> v)
 {
-  assert(v.size() == SIZE && "Vector initialzer list has incorrect size.");
+  assert(v.size() == N && "Vector initialzer list has incorrect size.");
   std::copy(v.begin(), v.end(), data.begin());
 }
 
-template <typename T, size_t SIZE>
-size_t Vec<T, SIZE>::len()
+template <typename T, size_t N>
+size_t Vec<T, N>::len()
 {
-  return SIZE;
+  return N;
 }
 
-template <typename T, size_t SIZE>
-T &Vec<T, SIZE>::operator[](size_t i)
+template <typename T, size_t N>
+T &Vec<T, N>::operator[](size_t i)
 {
   return data[i];
 }
 
-template <typename T, size_t SIZE>
-const T &Vec<T, SIZE>::operator[](size_t i) const
+template <typename T, size_t N>
+const T &Vec<T, N>::operator[](size_t i) const
 {
+  assert(i < N && "Accessing outside of vector bounds.");
   return data[i];
 }
 
-template <typename T, size_t SIZE>
-Vec<T, SIZE> Vec<T, SIZE>::operator+(Vec<T, SIZE> &v) const
+template <typename T, size_t N>
+Vec<T, N> Vec<T, N>::operator+(const Vec<T, N> &v) const
 {
-  Vec<T, SIZE> out;
-  for (size_t i = 0; i < SIZE; i++)
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
     out[i] = data[i] + v[i];
   return out;
 }
 
-template <typename T, size_t SIZE>
-Vec<T, SIZE> Vec<T, SIZE>::operator-(Vec<T, SIZE> &v) const
+template <typename T, size_t N>
+Vec<T, N> Vec<T, N>::operator-(const Vec<T, N> &v) const
 {
-  Vec<T, SIZE> out;
-  for (size_t i = 0; i < SIZE; i++)
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
     out[i] = data[i] - v[i];
   return out;
 }
 
-template <typename T, size_t SIZE>
-Vec<T, SIZE> Vec<T, SIZE>::operator*(T s) const
+template <typename T, size_t N>
+std::ostream &operator<<(std::ostream &os, const Vec<T, N> &v)
 {
-  Vec<T, SIZE> out;
-  for (size_t i = 0; i < SIZE; i++)
-    out[i] = data[i] * s;
+  os << "[";
+  for (size_t i = 0; i < N; i++)
+  {
+    os << v[i];
+    if (i < N - 1)
+      os << ", ";
+  }
+  os << "]";
+  return os;
+}
+
+template <typename T, size_t N>
+Vec<T, N> operator*(typename V_traits<T>::element_type lhs, const Vec<T, N> &rhs)
+{
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
+    out[i] = lhs * rhs[i];
   return out;
 }
 
-template <typename T, size_t SIZE>
-Vec<T, SIZE> Vec<T, SIZE>::operator/(T s) const
+template <typename T, size_t N>
+Vec<T, N> operator*(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs)
 {
-  Vec<T, SIZE> out;
-  for (size_t i = 0; i < SIZE; i++)
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
+    out[i] = rhs * lhs[i];
+  return out;
+}
+
+template <typename T, size_t N>
+T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs)
+{
+  T total = 0;
+  for (size_t i = 0; i < N; i++)
+    total += rhs[i] * lhs[i];
+  return total;
+}
+
+template <typename T, size_t N, size_t M>
+Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<T, N> &rhs)
+{
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
+    out[i] = dot(lhs[i], rhs);
+  return out;
+}
+
+template <typename T, size_t N>
+T minor(const Vec<Vec<T, N>, N> &m, size_t col, size_t row)
+{
+  Vec<Vec<T, N - 1>, N - 1> tmp;
+  size_t dst_row = 0;
+  size_t dst_col = 0;
+  for (size_t c = 0; c < N; c++)
   {
-    out[i] = data[i] / s;
+    dst_row = 0;
+    if (c == col)
+      continue;
+    for (size_t r = 0; r < N; r++)
+    {
+      if (r == row)
+        continue;
+      tmp[dst_col][dst_row] = m[c][r];
+      dst_row += 1;
+    }
+    dst_col += 1;
+  }
+  std::cout << "computed sub: " << "(" << col << ", " << row << ") res:" << det(tmp) << std::endl;
+  std::cout << tmp << std::endl;
+  return det(tmp);
+}
+
+template <typename T, size_t N>
+T cofactor(const Vec<Vec<T, N>, N> &m, size_t col, size_t row)
+{
+  return std::pow(-1, col + row) * minor(m, col, row);
+}
+
+template <typename T>
+T det(const Vec<Vec<T, 2>, 2> &m)
+{
+  return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+}
+
+template <typename T>
+T det(const Vec<Vec<T, 3>, 3> &m)
+{
+  return m[0][0] * m[1][1] * m[2][2] +
+         m[0][1] * m[1][2] * m[2][0] +
+         m[0][2] * m[1][0] * m[2][1] -
+         m[2][0] * m[1][1] * m[0][2] -
+         m[2][1] * m[1][2] * m[0][0] -
+         m[2][2] * m[1][0] * m[0][1];
+}
+
+template <typename T, size_t N>
+T det(const Vec<Vec<T, N>, N> &m)
+{
+  const size_t c = 0;
+  T total = 0;
+  for (size_t r = 0; r < N; r++)
+  {
+    total += m[c][r] * cofactor(m, 0, r);
+  }
+  return total;
+}
+
+template <typename T, size_t N>
+Vec<Vec<T, 1>, N> transpose(const Vec<T, N> &v)
+{
+  Vec<Vec<T, 1>, N> out;
+  for (size_t i = 0; i < N; i++)
+  {
+    out[i][0] = v[i];
   }
   return out;
 }
 
-template <typename T, size_t SIZE>
-T Vec<T, SIZE>::dot(Vec<T, SIZE> &v)
+template <typename T, size_t N>
+Vec<T, N> transpose(Vec<Vec<T, 1>, N> &m)
 {
-  T out;
-  for (size_t i = 0; i < SIZE; i++)
+  Vec<T, N> out;
+  for (size_t i = 0; i < N; i++)
   {
-    out += data[i] * v[i];
+    out[i] = m[i][0];
   }
   return out;
 }
 
-template <size_t SIZE>
-VecF<SIZE>::VecF()
+template <typename T, size_t N, size_t M>
+Vec<Vec<T, N>, M> transpose(const Vec<Vec<T, M>, N> &m)
 {
-  for (size_t i = 0; i < SIZE; i++)
-    this->data[i] = 0.0f;
+  Vec<Vec<T, N>, M> out;
+  for (size_t i = 0; i < N; i++)
+  {
+    for (size_t j = 0; j < M; j++)
+    {
+      out[j][i] = m[i][j];
+    }
+  }
+  return out;
 }
-
-Vec2::Vec2(float x, float y) : x(data[0]), y(data[1]) {}
-
-// Vec3::Vec3() : x(data[0]), y(data[1]), z(data[2]){};
-
-Vec3::Vec3(float x, float y, float z) : x(data[0]), y(data[1]), z(data[2]) {}

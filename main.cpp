@@ -1,25 +1,22 @@
 #include <iostream>
 #include "vector.h"
-#include "matrix.h"
 
 int main()
 {
-  Vec2 veca({1.0f, 2.0f});
-  Vec2 vecb= {3.0f, 4.0f};
-  std::cout << veca << std::endl;
-
-  Mat<float, 2, 2> mat = {
-      Vec2({1.0f, 2.0f}),
-      Vec2({3.0f, 4.0f})
-  };
-  Mat<float, 2, 2> mat2 = {
-      veca,
-      vecb
-  };
-  std::cout << mat2.mult(mat) << std::endl;
-
-  Vec2 vec2a = {1.0f, 2.0f};
-  Vec2 vec2b = {3.0f, 4.0f};
-  vec2a.x = 5;
-  std::cout << vec2a << std::endl;
+  Vecf2 a = {1, 3};
+  Vecf2 b = {3, 4};
+  Matf3 c = {{0, 3, 3}, {3, 4, 6}, {9, 3, 3}};
+  Matf2 d = {{1, 3}, {4, 2}};
+  Matf4 e = {{0, 3, 3, 1}, {3, 10, 6, 2}, {9, 3, 3, 4}, {10, 3, 3, 1}};
+  // std::cout << I3 <<std::endl;
+  // std::cout << matmul(d, b) << std::endl;
+  // auto m = minor(c, 1, 1);
+  // std::cout << det(c) << std::endl;
+  // std::cout << e << std::endl;
+  // std::cout << det(e) << std::endl;
+  // std::cout << e << std::endl;
+  Vec<Vec<float, 1>, 2> f = {{0}, {1}};
+  std::cout << f << std::endl;
+  // std::cout << f << std::endl;
+  std::cout << transpose(f) << std::endl;
 }
