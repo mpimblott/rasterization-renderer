@@ -144,6 +144,15 @@ T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs)
   return total;
 }
 
+template <typename T, size_t N>
+T dot(const Vec<Vec<T, 1>, N> &lhs, const Vec<T, N> &rhs)
+{
+  T total = 0;
+  for (size_t i = 0; i < N; i++)
+    total += rhs[i] * lhs[i];
+  return total;
+}
+
 template <typename T, size_t N, size_t M>
 Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<T, N> &rhs)
 {
@@ -162,6 +171,7 @@ Vec<Vec<T, M>, P> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<Vec<T, N>, P> &
   {
     for (size_t c = 0; c < P; c++)
     {
+      T tot = 0;
       out[c][r] = dot(tmp[r], rhs[c]);
     }
   }

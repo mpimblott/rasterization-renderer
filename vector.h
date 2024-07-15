@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <tuple>
+#include <utility>
 #include "util.h"
 
 template <typename T, size_t N>
@@ -30,6 +32,37 @@ struct V_traits<Vec<T, N>>
   typedef typename V_traits<T>::element_type element_type;
 };
 
+template <typename T, size_t N>
+struct V_shape
+{
+  using dimensions = std::tuple<size_t>;
+  constexpr dimensions get_dim() {return std::make_tuple(N);}
+};
+
+template <typename T, size_t N, size_t M>
+struct V_shape<Vec<T, N>, M>
+{
+  using inner_dim = typename V_shape<T, N>::dimensions;
+  using dimensions = decltype(std::tuple_cat(std::make_tuple(M), inner_dim()));
+  constexpr dimensions get_dim() {
+    return std::tuple_cat(std::make_tuple(M), V_shape<T, N>::get_dim());
+  }
+};
+
+void print_tuple(const std::tuple<size_t> &t)
+{
+  std::cout << std::get<0>(t);
+}
+
+template <typename T, size_t N, size_t M>
+void print_dimensions(const Vec<Vec<T, N>, M> &m) 
+{
+  auto dims = V_shape<Vec<T, N>, M>().get_dim();
+  std::cout << "Dimensions: ";
+  print_tuple(dims);
+  std::cout << std::endl;
+}
+
 // declare friend function templates
 template <typename T, size_t N>
 std::ostream &operator<<(std::ostream &os, const Vec<T, N> &v);
@@ -51,6 +84,9 @@ Vec<T, N> operator/(const Vec<T, N> & lhs, typename V_traits<T>::element_type rh
 
 template <typename T, size_t N>
 T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
+
+template <typename T, size_t N, size_t M>
+T dot(const Vec<Vec<T, 1>, N> &lhs, const Vec<T, N> &rhs);
 
 template <typename T, size_t N, size_t M>
 Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<T, N> &rhs);
@@ -108,7 +144,7 @@ public:
   friend Vec<T, N> operator* <>(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs);
   friend Vec<T, N> operator/ <>(const Vec<T, N> & lhs, typename V_traits<T>::element_type rhs);
   // friend Vec<Vec<T, N>, N> operator/ <>(const Vec<Vec<T, N>, N> & lhs, typename V_traits<T>::element_type rhs);
-  friend T dot<>(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
+  // friend T dot<>(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
   // Height, Width (rows, cols)
   // friend Vec<T, N> matmul<>(const Vec<Vec<T, N>, N> &lhs, const Vec<T, N> &rhs);
 

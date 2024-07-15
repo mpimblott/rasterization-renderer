@@ -25,4 +25,5 @@ int main()
   // std::cout << adjoint(A) << std::endl;
   auto o = matmul(I2, d);
   std::cout << o << std::endl;
+  print_dimensions(o);
 }

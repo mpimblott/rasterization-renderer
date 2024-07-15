@@ -8,7 +8,9 @@ add_executable(
   RasterizeRenderer
   main.cpp
   vector.h
-)
+  )
+  
+target_compile_features(RasterizeRenderer PRIVATE cxx_std_20)
 
 # include the external library at /external/stb_image.h
 include_directories(external)
