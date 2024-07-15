@@ -23,5 +23,6 @@ int main()
   // std::cout << A << std::endl;
   // std::cout << transpose(A) << std::endl;
   // std::cout << adjoint(A) << std::endl;
-  std::cout << c << std::endl;
+  auto o = matmul(I2, d);
+  std::cout << o << std::endl;
 }

@@ -44,16 +44,19 @@ template <typename T, size_t N>
 Vec<T, N> operator*(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs);
 
 template <typename T, size_t N>
-Vec<T, N> operator/(const Vec<T, N> & lhs, const T rhs);
+Vec<T, N> operator/(const Vec<T, N> & lhs, typename V_traits<T>::element_type rhs);
 
-template <typename T, size_t N>
-Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, const T rhs);
+// template <typename T, size_t N>
+// Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, typename V_traits<T>::element_type rhs);
 
 template <typename T, size_t N>
 T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
 
 template <typename T, size_t N, size_t M>
 Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<T, N> &rhs);
+
+template <typename T, size_t N, size_t M, size_t P>
+Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<Vec<T, N>, M> &rhs);
 
 template <typename T, size_t N>
 T minor(const Vec<Vec<T, N>, N> &m, size_t col, size_t row);
@@ -103,8 +106,8 @@ public:
   friend std::ostream &operator<< <>(std::ostream &os, const Vec<Vec<T, N>, N> &m);
   friend Vec<T, N> operator* <>(typename V_traits<T>::element_type lhs, const Vec<T, N> &rhs);
   friend Vec<T, N> operator* <>(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs);
-  friend Vec<T, N> operator/ <>(const Vec<T, N> & lhs, const T rhs);
-  friend Vec<Vec<T, N>, N> operator/ <>(const Vec<Vec<T, N>, N> & lhs, const T rhs);
+  friend Vec<T, N> operator/ <>(const Vec<T, N> & lhs, typename V_traits<T>::element_type rhs);
+  // friend Vec<Vec<T, N>, N> operator/ <>(const Vec<Vec<T, N>, N> & lhs, typename V_traits<T>::element_type rhs);
   friend T dot<>(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
   // Height, Width (rows, cols)
   // friend Vec<T, N> matmul<>(const Vec<Vec<T, N>, N> &lhs, const Vec<T, N> &rhs);

@@ -114,7 +114,7 @@ Vec<T, N> operator*(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs
 }
 
 template <typename T, size_t N>
-Vec<T, N> operator/(const Vec<T, N> & lhs, const T rhs)
+Vec<T, N> operator/(const Vec<T, N> & lhs, typename V_traits<T>::element_type rhs)
 {
   Vec<T, N> out;
   for (size_t i = 0; i < N; i++)
@@ -124,16 +124,16 @@ Vec<T, N> operator/(const Vec<T, N> & lhs, const T rhs)
   return out;
 }
 
-template <typename T, size_t N>
-Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, const T rhs)
-{
-  Vec<Vec<T, N>, N> out;
-  for (size_t i = 0; i < N; i++)
-  {
-    out[i] = lhs[i] / rhs;
-  }
-  return out;
-}
+// template <typename T, size_t N>
+// Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, typename V_traits<T>::element_type rhs)
+// {
+//   Vec<Vec<T, N>, N> out;
+//   for (size_t i = 0; i < N; i++)
+//   {
+//     out[i] = lhs[i] / rhs;
+//   }
+//   return out;
+// }
 
 template <typename T, size_t N>
 T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs)
@@ -150,6 +150,21 @@ Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<T, N> &rhs)
   Vec<T, N> out;
   for (size_t i = 0; i < N; i++)
     out[i] = dot(lhs[i], rhs);
+  return out;
+}
+
+template <typename T, size_t N, size_t M, size_t P>
+Vec<Vec<T, M>, P> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<Vec<T, N>, P> &rhs)
+{
+  auto tmp = transpose(lhs);
+  Vec<Vec<T, M>, P> out;
+  for (size_t r = 0; r < M; r++)
+  {
+    for (size_t c = 0; c < P; c++)
+    {
+      out[c][r] = dot(tmp[r], rhs[c]);
+    }
+  }
   return out;
 }
 
@@ -267,6 +282,5 @@ Vec<Vec<T, N>, M> adjoint(Vec<Vec<T, M>, N> &m)
 template <typename T, size_t N, size_t M>
 Vec<Vec<T, N>, M> inv(Vec<Vec<T, M>, N> &m)
 {
-  Vec<Vec<T, N>, M> out;
-
+  return adjoint(m) / det(m);
 }
