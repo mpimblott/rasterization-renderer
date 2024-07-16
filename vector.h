@@ -153,10 +153,6 @@ public:
   friend Vec<Y, M> operator*(const Vec<Y, U> &lhs, const Vec<Vec<Y, M>, U> &rhs);
   template <typename Y, size_t M, size_t U, size_t P>
   friend Vec<Vec<Y, P>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, P>, U> &rhs);
-  // friend Vec<Vec<T, N>, N> operator/ <>(const Vec<Vec<T, N>, N> & lhs, typename V_traits<T>::element_type rhs);
-  // friend T dot<>(const Vec<T, N> &lhs, const Vec<T, N> &rhs);
-  // Height, Width (rows, cols)
-  // friend Vec<T, N> matmul<>(const Vec<Vec<T, N>, N> &lhs, const Vec<T, N> &rhs);
 
 private:
   std::array<T, N> data;
