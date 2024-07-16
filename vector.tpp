@@ -80,16 +80,13 @@ template <typename T, size_t N>
 std::ostream &operator<<(std::ostream &os, const Vec<Vec<T, N>, N> &m)
 {
   os << "[";
-  for (size_t c = 0; c < N; c++)
-  {
-    for (size_t r = 0; r < N; r++)
-    {
-    os << m[r][c];
+  for (size_t r = 0; r < N; r++)
+  { 
+    if (r > 0)
+      os << " ";
+    os << m[r];
     if (r < N - 1)
-      os << ",";
-    }
-    if (c < N - 1)
-      os << "\n ";
+      os << "\n";
   }
   os << "]";
   return os;
@@ -154,25 +151,32 @@ T dot(const Vec<Vec<T, 1>, N> &lhs, const Vec<T, N> &rhs)
 }
 
 template <typename T, size_t N, size_t M>
-Vec<T, M> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<T, N> &rhs)
+Vec<T, M> matmul(const Vec<T, N> &lhs, const Vec<Vec<T, M>, N> &rhs)
 {
-  Vec<T, N> out;
-  for (size_t i = 0; i < N; i++)
-    out[i] = dot(lhs[i], rhs);
+  Vec<T, M> out;
+  for (size_t c = 0; c < M; c++)
+  {
+    T t = 0;
+    for (size_t r = 0; r < N; r++)
+    {
+      t += lhs[r] * rhs[r][c];
+    }
+    out[c] = t;
+  }
   return out;
 }
 
 template <typename T, size_t N, size_t M, size_t P>
-Vec<Vec<T, M>, P> matmul(const Vec<Vec<T, M>, N> &lhs, const Vec<Vec<T, N>, P> &rhs)
+Vec<Vec<T, P>, M> matmul(const Vec<Vec<T, N>, M> &lhs, const Vec<Vec<T, P>, N> &rhs)
 {
-  auto tmp = transpose(lhs);
-  Vec<Vec<T, M>, P> out;
-  for (size_t r = 0; r < M; r++)
+  auto tmp = transpose(rhs);
+  Vec<Vec<T, P>, M> out;
+  for (size_t c = 0; c < P; c++)
   {
-    for (size_t c = 0; c < P; c++)
+    for (size_t r = 0; r < M; r++)
     {
       T tot = 0;
-      out[c][r] = dot(tmp[r], rhs[c]);
+      out[r][c] = dot(lhs[r], tmp[c]);
     }
   }
   return out;

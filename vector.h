@@ -32,36 +32,36 @@ struct V_traits<Vec<T, N>>
   typedef typename V_traits<T>::element_type element_type;
 };
 
-template <typename T, size_t N>
-struct V_shape
-{
-  using dimensions = std::tuple<size_t>;
-  constexpr dimensions get_dim() {return std::make_tuple(N);}
-};
+// template <typename T, size_t N>
+// struct V_shape
+// {
+//   using dimensions = std::tuple<size_t>;
+//   constexpr dimensions get_dim() {return std::make_tuple(N);}
+// };
 
-template <typename T, size_t N, size_t M>
-struct V_shape<Vec<T, N>, M>
-{
-  using inner_dim = typename V_shape<T, N>::dimensions;
-  using dimensions = decltype(std::tuple_cat(std::make_tuple(M), inner_dim()));
-  constexpr dimensions get_dim() {
-    return std::tuple_cat(std::make_tuple(M), V_shape<T, N>::get_dim());
-  }
-};
+// template <typename T, size_t N, size_t M>
+// struct V_shape<Vec<T, N>, M>
+// {
+//   using inner_dim = typename V_shape<T, N>::dimensions;
+//   using dimensions = decltype(std::tuple_cat(std::make_tuple(M), inner_dim()));
+//   constexpr dimensions get_dim() {
+//     return std::tuple_cat(std::make_tuple(M), V_shape<T, N>::get_dim());
+//   }
+// };
 
 void print_tuple(const std::tuple<size_t> &t)
 {
   std::cout << std::get<0>(t);
 }
 
-template <typename T, size_t N, size_t M>
-void print_dimensions(const Vec<Vec<T, N>, M> &m) 
-{
-  auto dims = V_shape<Vec<T, N>, M>().get_dim();
-  std::cout << "Dimensions: ";
-  print_tuple(dims);
-  std::cout << std::endl;
-}
+// template <typename T, size_t N, size_t M>
+// void print_dimensions(const Vec<Vec<T, N>, M> &m) 
+// {
+//   auto dims = V_shape<Vec<T, N>, M>().get_dim();
+//   std::cout << "Dimensions: ";
+//   print_tuple(dims);
+//   std::cout << std::endl;
+// }
 
 // declare friend function templates
 template <typename T, size_t N>
