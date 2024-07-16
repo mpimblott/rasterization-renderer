@@ -76,16 +76,16 @@ std::ostream &operator<<(std::ostream &os, const Vec<T, N> &v)
   return os;
 }
 
-template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &os, const Vec<Vec<T, N>, N> &m)
+template <typename Y, size_t M, size_t U>
+std::ostream &operator<<(std::ostream &os, const Vec<Vec<Y, M>, U> &m)
 {
   os << "[";
-  for (size_t r = 0; r < N; r++)
+  for (size_t r = 0; r < U; r++)
   { 
     if (r > 0)
       os << " ";
     os << m[r];
-    if (r < N - 1)
+    if (r < U - 1)
       os << "\n";
   }
   os << "]";
@@ -121,16 +121,16 @@ Vec<T, N> operator/(const Vec<T, N> & lhs, typename V_traits<T>::element_type rh
   return out;
 }
 
-// template <typename T, size_t N>
-// Vec<Vec<T, N>, N> operator/(const Vec<Vec<T, N>, N> & lhs, typename V_traits<T>::element_type rhs)
-// {
-//   Vec<Vec<T, N>, N> out;
-//   for (size_t i = 0; i < N; i++)
-//   {
-//     out[i] = lhs[i] / rhs;
-//   }
-//   return out;
-// }
+template <typename Y, size_t M, size_t U>
+Vec<Vec<Y, U>, M> operator/(const Vec<Vec<Y, U>, M> & lhs, typename V_traits<Y>::element_type rhs)
+{
+  Vec<Vec<Y, U>, M> out;
+  for (size_t i = 0; i < M; i++)
+  {
+    out[i] = lhs[i] / rhs;
+  }
+  return out;
+}
 
 template <typename T, size_t N>
 T dot(const Vec<T, N> &lhs, const Vec<T, N> &rhs)
@@ -296,3 +296,15 @@ Vec<Vec<T, N>, M> inv(Vec<Vec<T, M>, N> &m)
 {
   return adjoint(m) / det(m);
 }
+
+// template <typename T, size_t N>
+// size_t shape(Vec<T, N> &m)
+// {
+//   return N;
+// }
+
+// template <typename T, size_t N, size_t M>
+// std::vector<size_t> shape(Vec<Vec<T, M>, N> &m)
+// {
+//   return 
+// }
