@@ -5,5 +5,5 @@
 int main()
 {
   Point3H a = {1, 2, 4};
-  std::cout << a[3] << std::endl;
+  std::cout << a[5] << std::endl;
 }

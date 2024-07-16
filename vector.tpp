@@ -34,6 +34,7 @@ size_t Vec<T, N>::len()
 template <typename T, size_t N>
 T &Vec<T, N>::operator[](size_t i)
 {
+  assert(i < N && "Accessing outside of vector bounds.");
   return data[i];
 }
 
