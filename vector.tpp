@@ -150,14 +150,14 @@ T dot(const Vec<Vec<T, 1>, N> &lhs, const Vec<T, N> &rhs)
   return total;
 }
 
-template <typename T, size_t N, size_t M>
-Vec<T, M> matmul(const Vec<T, N> &lhs, const Vec<Vec<T, M>, N> &rhs)
+template <typename Y, size_t M, size_t U>
+Vec<Y, M> operator*(const Vec<Y, U> &lhs, const Vec<Vec<Y, M>, U> &rhs)
 {
-  Vec<T, M> out;
+  Vec<Y, M> out;
   for (size_t c = 0; c < M; c++)
   {
-    T t = 0;
-    for (size_t r = 0; r < N; r++)
+    Y t = 0;
+    for (size_t r = 0; r < U; r++)
     {
       t += lhs[r] * rhs[r][c];
     }
@@ -166,16 +166,16 @@ Vec<T, M> matmul(const Vec<T, N> &lhs, const Vec<Vec<T, M>, N> &rhs)
   return out;
 }
 
-template <typename T, size_t N, size_t M, size_t P>
-Vec<Vec<T, P>, M> matmul(const Vec<Vec<T, N>, M> &lhs, const Vec<Vec<T, P>, N> &rhs)
+template <typename Y, size_t M, size_t U, size_t P>
+Vec<Vec<Y, P>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, P>, U> &rhs)
 {
   auto tmp = transpose(rhs);
-  Vec<Vec<T, P>, M> out;
+  Vec<Vec<Y, P>, M> out;
   for (size_t c = 0; c < P; c++)
   {
     for (size_t r = 0; r < M; r++)
     {
-      T tot = 0;
+      Y tot = 0;
       out[r][c] = dot(lhs[r], tmp[c]);
     }
   }
@@ -202,8 +202,6 @@ T minor(const Vec<Vec<T, N>, N> &m, size_t col, size_t row)
     }
     dst_col += 1;
   }
-  // std::cout << "computed sub: " << "(" << col << ", " << row << ") res:" << det(tmp) << std::endl;
-  // std::cout << tmp << std::endl;
   return det(tmp);
 }
 
