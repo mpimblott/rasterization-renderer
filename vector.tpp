@@ -17,6 +17,14 @@ Vec<T, N>::Vec(const T (&data)[N])
 //     this->data[i] = data[i];
 //   }
 // }
+template <typename T, size_t N>
+Vec<T, N>::Vec(const std::array<T, N> data)
+{
+  for (unsigned int i = 0; i < N; i++)
+  {
+    this->data[i] = data[i];
+  } 
+}
 
 template <typename T, size_t N>
 Vec<T, N>::Vec(std::initializer_list<T> v)
@@ -151,6 +159,7 @@ T dot(const Vec<Vec<T, 1>, N> &lhs, const Vec<T, N> &rhs)
   return total;
 }
 
+// left multiplying by a row vector
 template <typename Y, size_t M, size_t U>
 Vec<Y, M> operator*(const Vec<Y, U> &lhs, const Vec<Vec<Y, M>, U> &rhs)
 {
@@ -167,10 +176,25 @@ Vec<Y, M> operator*(const Vec<Y, U> &lhs, const Vec<Vec<Y, M>, U> &rhs)
   return out;
 }
 
+// right multiplying by a column vector
+template <typename Y, size_t M, size_t U>
+Vec<Vec<Y, 1>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, 1>, U> &rhs)
+{
+  Vec<Y, U> tmp = transpose(rhs);
+  Vec<Vec<Y, 1>, M> out;
+  for (size_t r = 0; r < M; r++)
+  {
+    Y tot = 0;
+    out[r][0] = dot(lhs[r], tmp);
+  }
+  return out;
+}
+
+// MxU * UxP
 template <typename Y, size_t M, size_t U, size_t P>
 Vec<Vec<Y, P>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, P>, U> &rhs)
 {
-  auto tmp = transpose(rhs);
+  Vec<Vec<Y, U>, P> tmp = transpose(rhs);
   Vec<Vec<Y, P>, M> out;
   for (size_t c = 0; c < P; c++)
   {
@@ -221,6 +245,7 @@ T det(const Vec<Vec<T, 2>, 2> &m)
 template <typename T>
 T det(const Vec<Vec<T, 3>, 3> &m)
 {
+  // using sarru's rule
   return m[0][0] * m[1][1] * m[2][2] +
          m[0][1] * m[1][2] * m[2][0] +
          m[0][2] * m[1][0] * m[2][1] -
@@ -253,7 +278,7 @@ Vec<Vec<T, 1>, N> transpose(const Vec<T, N> &v)
 }
 
 template <typename T, size_t N>
-Vec<T, N> transpose(Vec<Vec<T, 1>, N> &m)
+Vec<T, N> transpose(const Vec<Vec<T, 1>, N> &m)
 {
   Vec<T, N> out;
   for (size_t i = 0; i < N; i++)
@@ -309,3 +334,21 @@ Vec<Vec<T, N>, M> inv(Vec<Vec<T, M>, N> &m)
 // {
 //   return 
 // }
+
+template <typename T, size_t N>
+T Vec<T, N>::norm() const
+{
+  T tot = 0;
+  for (T const&i: data)
+  {
+    tot += pow(i, 2);
+  }
+  return sqrt(tot);
+}
+
+template <typename T, size_t N>
+Vec<T, N> Vec<T, N>::unit() const
+{
+  Vec<T, N> out(this->data);
+  return (out / norm());
+}

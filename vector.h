@@ -80,6 +80,9 @@ Vec<T, N> operator*(const Vec<T, N> &lhs, typename V_traits<T>::element_type rhs
 template <typename Y, size_t M, size_t U>
 Vec<Y, M> operator*(const Vec<Y, U> &lhs, const Vec<Vec<Y, M>, U> &rhs);
 
+template <typename Y, size_t M, size_t U>
+Vec<Vec<Y, 1>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, 1>, U> &rhs);
+
 template <typename Y, size_t M, size_t U, size_t P>
 Vec<Vec<Y, P>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, P>, U> &rhs);
 
@@ -114,7 +117,7 @@ template <typename T, size_t N>
 Vec<Vec<T, 1>, N> transpose(const Vec<T, N> &v);
 
 template <typename T, size_t N>
-Vec<T, N> transpose(Vec<Vec<T, 1>, N> &m);
+Vec<T, N> transpose(const Vec<Vec<T, 1>, N> &m);
 
 // rows, cols
 template <typename T, size_t N, size_t M>
@@ -138,6 +141,7 @@ class Vec
 public:
   Vec() = default;
   Vec(const T (&data)[N]);
+  Vec(const std::array<T, N>);
   Vec(std::initializer_list<T> data);
   // explicit Vec(const Vec<T, N> &data);
   T &operator[](size_t i);
@@ -153,10 +157,14 @@ public:
   friend Vec<T, N> operator/ <>(const Vec<T, N> & lhs, typename V_traits<T>::element_type rhs);
   template <typename Y, size_t M, size_t U>
   friend Vec<Y, M> operator*(const Vec<Y, U> &lhs, const Vec<Vec<Y, M>, U> &rhs);
+  template <typename Y, size_t M, size_t U>
+  friend Vec<Vec<Y, 1>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, 1>, U> &rhs);
   template <typename Y, size_t M, size_t U, size_t P>
   friend Vec<Vec<Y, P>, M> operator*(const Vec<Vec<Y, U>, M> &lhs, const Vec<Vec<Y, P>, U> &rhs);
   template <typename Y, size_t M, size_t U>
   friend Vec<Vec<Y, U>, M> operator/(const Vec<Vec<Y, U>, M> & lhs, typename V_traits<Y>::element_type rhs);
+  T norm() const;
+  Vec<T, N> unit() const;
 
 protected:
   std::array<T, N> data;
@@ -171,5 +179,9 @@ typedef Vec<Vec<Vec<float, 2>, 2>, 2> D3Arrf2;
 
 const Vec<Vec<float, 2>, 2> I2 = {{1, 0}, {0, 1}};
 const Vec<Vec<float, 3>, 3> I3 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+
+const Vec<float, 3> e1 = {1, 0, 0};
+const Vec<float, 3> e2 = {0, 1, 0};
+const Vec<float, 3> e3 = {0, 0, 1};
 
 #include "vector.tpp"
