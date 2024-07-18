@@ -1,6 +1,15 @@
-#include "geometry.h"
+#include "point.h"
 
 const double pi = std::acos(-1);
+
+Point3 &Point3::operator=(const Point3 &v)
+{
+  for (size_t i = 0; i < 3; i++)
+  {
+    data[i] = v[i];
+  }
+  return *this;
+}
 
 Point3h::Point3h()
 {
@@ -40,4 +49,13 @@ Point3h rotateX(Point3h &v, float angle)
   auto k = m * transpose(v);
   std::cout << transpose(m * transpose(v)) << std::endl;
   return e1h;
+}
+
+Point3h &Point3h::operator=(const Point3h &v)
+{
+  for (size_t i = 0; i < 3; i++)
+  {
+    data[i] = v[i];
+  }
+  return *this;
 }

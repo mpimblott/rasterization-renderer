@@ -54,6 +54,31 @@ const T &Vec<T, N>::operator[](size_t i) const
 }
 
 template <typename T, size_t N>
+bool Vec<T, N>::operator==(const Vec<T, N> &v)
+{
+  bool same = true;
+  for (size_t i = 0; i < N; i++)
+  {
+    if (data[i] != v[i])
+    {
+      same = false;
+    }
+  }
+  return same;
+}
+
+
+template <typename T, size_t N>
+Vec<T, N> &Vec<T, N>::operator=(const Vec<T, N> &v)
+{
+  for (size_t i = 0; i < N; i++)
+  {
+    data[i] = v[i];
+  }
+  return *this;
+}
+
+template <typename T, size_t N>
 Vec<T, N> Vec<T, N>::operator+(const Vec<T, N> &v) const
 {
   Vec<T, N> out;

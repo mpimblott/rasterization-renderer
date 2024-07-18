@@ -147,6 +147,8 @@ public:
   T &operator[](size_t i);
   const T &operator[](size_t i) const;
   size_t len();
+  bool operator==(const Vec<T, N> &v);
+  Vec<T, N> &operator=(const Vec<T, N> &v);
   Vec<T, N> operator+(const Vec<T, N> &v) const;
   Vec<T, N> operator-(const Vec<T, N> &v) const;
   friend std::ostream &operator<< <>(std::ostream &os, const Vec<T, N> &v);
