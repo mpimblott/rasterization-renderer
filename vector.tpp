@@ -343,22 +343,25 @@ Vec<Vec<T, N>, M> adjoint(Vec<Vec<T, M>, N> &m)
 }
 
 template <typename T, size_t N, size_t M>
-Vec<Vec<T, N>, M> inv(Vec<Vec<T, M>, N> &m)
+Vec<Vec<T, N>, M> adjoint(const Vec<Vec<T, M>, N> &m)
+{
+  Vec<Vec<T, N>, M> out;
+  auto transp = transpose(m);
+  for (size_t c = 0; c < N; c++)
+  {
+    for (size_t r = 0; r < M; r++)
+    {
+      out[c][r] = cofactor(transp, c, r);
+    }
+  }
+  return out;
+}
+
+template <typename T, size_t N, size_t M>
+Vec<Vec<T, N>, M> inv(const Vec<Vec<T, M>, N> &m)
 {
   return adjoint(m) / det(m);
 }
-
-// template <typename T, size_t N>
-// size_t shape(Vec<T, N> &m)
-// {
-//   return N;
-// }
-
-// template <typename T, size_t N, size_t M>
-// std::vector<size_t> shape(Vec<Vec<T, M>, N> &m)
-// {
-//   return 
-// }
 
 template <typename T, size_t N>
 T Vec<T, N>::norm() const
@@ -376,4 +379,52 @@ Vec<T, N> Vec<T, N>::unit() const
 {
   Vec<T, N> out(this->data);
   return (out / norm());
+}
+
+template <typename T, size_t N>
+Vec<T, N> &ZeroVec(Vec<T, N> &v)
+{
+  for (size_t i = 0; i < N; i++)
+  {
+    v[i] = 0;
+  }
+  return v;
+}
+
+template <typename Y, size_t M, size_t U>
+Vec<Vec<Y, U>, M> &ZeroVec(Vec<Vec<Y, U>, M> &v)
+{
+  for (size_t i = 0; i < M; i++)
+  {
+    ZeroVec(v[i]);
+  } 
+  return v;
+}
+
+template <typename Y, size_t M, size_t U>
+Vec<Vec<Y, U>, M> &Id(Vec<Vec<Y, U>, M> &v)
+{
+  for (size_t r = 0; r < M; r++)
+  {
+    for (size_t c = 0; c < U; c++)
+    {
+      if (c == r)
+      {
+        v[r][c] = 1;
+      } else {
+        v[r][c] = 0;
+      }
+    }
+  }
+  return v;
+}
+
+template <typename Y, size_t M, size_t U, size_t J>
+Vec<Vec<Vec<Y, J>, U>, M>  &Id(Vec<Vec<Vec<Y, J>, U>, M> &v)
+{
+  for (size_t i = 0; i < M; i++)
+  {
+    Id(v[i]);
+  }
+  return v;
 }
