@@ -11,13 +11,13 @@ public:
   Camera(float viewportWidth, float viewportHeight, size_t pixelsX, size_t pixelsY);
   Matf4 wld2cam() const;
   Matf4 cam2wld() const;
-  void setPos();
-  void setLookat();
+  void setPos(Point3 &pos);
+  void setLookat(Point3 &v);
   Point3 getPos() const;
   Vec3 getLookat() const;
-  Camera &transform(Matf4 &m);
-  Point3h zDivide(Point3h &point) const;
-  Point3h screenToRaster(Point3h &point);
+  Point3h &camToScreen(Point3h &point);
+  Point3h &screenToRaster(Point3h &point);
+  Point3h &computePixelCoordinate(Point3h &point);
 
 private:
   void init();
@@ -26,6 +26,7 @@ private:
   float viewportHeight;
   size_t pixelsX;
   size_t pixelsY;
+  Point3h defaultPos = Point3h(0, 0, 0);
 };
 
 class Renderer

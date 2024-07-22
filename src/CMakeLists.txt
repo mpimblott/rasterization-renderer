@@ -11,6 +11,7 @@ add_executable(
   camera.cpp
   geometry.cpp
   ppm.cpp
+  geom_util.cpp
   )
   
 target_compile_features(Renderer PRIVATE cxx_std_11)
