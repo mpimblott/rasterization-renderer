@@ -15,8 +15,6 @@ public:
   void setLookat(Point3 &v);
   Point3 getPos() const;
   Vec3 getLookat() const;
-  Point3h &camToScreen(Point3h &point);
-  Point3h &screenToRaster(Point3h &point);
   Point3h &computePixelCoordinate(Point3h &point);
 
 private:
@@ -27,6 +25,8 @@ private:
   size_t pixelsX;
   size_t pixelsY;
   Point3h defaultPos = Point3h(0, 0, 0);
+  Point3h &camToScreen(Point3h &point);
+  Point3h &screenToRaster(Point3h &point);
 };
 
 class Renderer

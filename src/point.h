@@ -12,9 +12,9 @@ public:
   // using Vec::Vec;
   Point3();
   Point3(float x, float y, float z);
-  Property<float> x = (*this)[0];
-  Property<float> y = (*this)[1];
-  Property<float> z = (*this)[2];
+  float &x();
+  float &y();
+  float &z();
   Point3 &operator=(const Point3 &v);
   Point3 &operator=(const Vec<float, 3> &v);
 };
@@ -26,9 +26,9 @@ public:
   Point3h(std::initializer_list<float> v);
   Point3h(Vec<float, 4> &v);
   Point3h(float x, float y, float z);
-  Property<float> x = (*this)[0];
-  Property<float> y = (*this)[1];
-  Property<float> z = (*this)[2];
+  float &x();
+  float &y();
+  float &z();
   float norm() const;
   Point3h unit() const;
   Point3h &operator=(const Point3h &v);

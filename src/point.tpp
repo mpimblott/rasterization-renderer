@@ -16,6 +16,21 @@ inline Point3::Point3(float x, float y, float z)
   data[2] = z;
 }
 
+inline float& Point3::x()
+{
+  return data[0];
+}
+
+inline float& Point3::y()
+{
+  return data[1];
+}
+
+inline float& Point3::z()
+{
+  return data[2];
+}
+
 inline Point3 &Point3::operator=(const Point3 &v)
 {
   for (size_t i = 0; i < 3; i++)
@@ -61,6 +76,22 @@ inline Point3h::Point3h(float x, float y, float z)
   data[2] = z;
   data[3] = 1;
 }
+
+inline float& Point3h::x()
+{
+  return data[0];
+}
+
+inline float& Point3h::y()
+{
+  return data[1];
+}
+
+inline float& Point3h::z()
+{
+  return data[2];
+}
+
 
 inline float Point3h::norm() const
 {

@@ -45,9 +45,9 @@ void Camera::setLookat(Point3 &v)
 
 Point3h &Camera::camToScreen(Point3h &point)
 {
-  point.x = point.x / (-1 * point.z);
-  point.y = point.y / (-1 * point.z);
-  point.z = -1 * point.z;
+  point.x() = point.x() / (-1 * point.z());
+  point.y() = point.y() / (-1 * point.z());
+  point.z() = -1 * point.z();
   return point;
 }
 
@@ -57,10 +57,10 @@ Point3h &Camera::camToScreen(Point3h &point)
 */
 Point3h &Camera::screenToRaster(Point3h &point)
 {
-  float normalised_x = (point.x + (viewportWidth / 2)) / viewportWidth;
-  float normalised_y = (point.y + (viewportHeight / 2)) / viewportHeight;
-  point.x = std::floor(normalised_x * pixelsX);
-  point.y = std::floor((1 - normalised_y) * pixelsY);
+  float normalised_x = (point.x() + (viewportWidth / 2)) / viewportWidth;
+  float normalised_y = (point.y() + (viewportHeight / 2)) / viewportHeight;
+  point.x() = std::floor(normalised_x * pixelsX);
+  point.y() = std::floor((1 - normalised_y) * pixelsY);
   return point;
 }
 
