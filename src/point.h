@@ -15,6 +15,9 @@ public:
   float &x();
   float &y();
   float &z();
+  const float &x() const;
+  const float &y() const;
+  const float &z() const;
   Point3 &operator=(const Point3 &v);
   Point3 &operator=(const Vec<float, 3> &v);
 };
@@ -29,6 +32,9 @@ public:
   float &x();
   float &y();
   float &z();
+  const float &x() const;
+  const float &y() const;
+  const float &z() const;
   float norm() const;
   Point3h unit() const;
   Point3h &operator=(const Point3h &v);
