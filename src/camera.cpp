@@ -4,15 +4,15 @@ Camera::Camera(float viewportWidth, float viewportHeight, size_t pixelsX, size_t
 {
   this->viewportWidth = viewportWidth;
   this->viewportHeight = viewportHeight;
-  this->pixelsX = pixelsX;
-  this->pixelsY = pixelsY;
+  this->pixelWidth = pixelsX;
+  this->pixelHeight = pixelsY;
   init();
 }
 
 void Camera::init()
 {
   Id(camMat);
-  std::vector<float> tmp(pixelsX * pixelsY * 3);
+  std::vector<float> tmp(pixelWidth * pixelHeight * 3);
   imgBuffer = tmp;
 }
 
@@ -26,7 +26,7 @@ Matf4 Camera::cam2wld() const
   return inv(camMat);
 }
 
-void Camera::setPos(Point3 &p)
+void Camera::set_pos(Point3 &p)
 {
   // build the translation matrix from the default position to the desired point
   camMat[3][0] = p[0] - defaultPos[0];
@@ -34,18 +34,18 @@ void Camera::setPos(Point3 &p)
   camMat[3][2] = p[2] - defaultPos[2];
 }
 
-Point3 Camera::getPos() const
+Point3 Camera::get_pos() const
 {
   return Point3(camMat[3][0], camMat[3][1], camMat[3][2]);
 }
 
-void Camera::setLookat(Point3 &v)
+void Camera::set_lookat(Point3 &v)
 {
-  Point3 pos = getPos();
+  Point3 pos = get_pos();
   Vec<float, 3> lookatVector = v - pos;
 }
 
-Point3h &Camera::camToScreen(const Point3h &src_pt, Point3h &dst_pt) const
+Point3h &Camera::cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const
 {
   dst_pt.x() = src_pt.x() / (-1 * src_pt.z());
   dst_pt.y() = src_pt.y() / (-1 * src_pt.z());
@@ -57,22 +57,22 @@ Point3h &Camera::camToScreen(const Point3h &src_pt, Point3h &dst_pt) const
   normalise the x and y coordinates in screen space to raster space
   (width and height limited by fov and rounded)
 */
-Point3h &Camera::screenToRaster(const Point3h &src_pt, Point3h &dst_pt) const
+Point3h &Camera::screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const
 {
   float normalised_x = (src_pt.x() + (viewportWidth / 2)) / viewportWidth;
   float normalised_y = (src_pt.y() + (viewportHeight / 2)) / viewportHeight;
-  dst_pt.x() = std::floor(normalised_x * pixelsX);
-  dst_pt.y() = std::floor((1 - normalised_y) * pixelsY);
+  dst_pt.x() = std::floor(normalised_x * pixelWidth);
+  dst_pt.y() = std::floor((1 - normalised_y) * pixelHeight);
   return dst_pt;
 }
 
 /*
  * compute the raster coordinate of a world coordinate
  */
-Point3h &Camera::computePixelCoordinate(const Point3h &src_pt, Point3h &dst_pt) const
+Point3h &Camera::compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const
 {
-  camToScreen(src_pt, dst_pt);
-  screenToRaster(dst_pt, dst_pt);
+  cam_to_screen(src_pt, dst_pt);
+  screen_to_raster(dst_pt, dst_pt);
   return dst_pt;
 }
 
@@ -84,7 +84,7 @@ Mesh Camera::build_projection(Mesh &mesh)
   {
     // create a new mesh with the projections of the points
     Point3h p;
-    computePixelCoordinate(vertex, p);
+    compute_pixel_coordinate(vertex, p);
     projection.add_vertex(p);
   }
   return projection;
@@ -94,11 +94,11 @@ void Camera::build_buffer(Mesh &mesh)
 {
   Mesh projection = build_projection(mesh);
   // std::cout << projection << std::endl;
-  for (size_t y = 0; y < pixelsY; y++)
+  for (size_t y = 0; y < pixelHeight; y++)
   {
-    for (size_t x = 0; x < pixelsX; x++)
+    for (size_t x = 0; x < pixelWidth; x++)
     {
-      size_t idx = y * pixelsY * 3 + 3 * x;
+      size_t idx = y * pixelHeight * 3 + 3 * x;
       if (test_point(x, y, projection))
       {
         imgBuffer[idx] = 1.0;

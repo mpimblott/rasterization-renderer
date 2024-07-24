@@ -45,7 +45,7 @@ const Point3h e2h = {0, 1, 0};
 const Point3h e3h = {0, 0, 1};
 
 template <typename T, size_t N>
-inline Point3h rotateX(Vec<float, 3> &v, double angle);
+inline Point3h rotate_x(Vec<float, 3> &v, double angle);
 
 using Vec3h = Point3h;
 using Vec3 = Point3;

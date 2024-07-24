@@ -18,10 +18,10 @@ public:
   Camera(float viewportWidth, float viewportHeight, size_t pixelsX, size_t pixelsY);
   Matf4 wld2cam() const;
   Matf4 cam2wld() const;
-  void setPos(Point3 &pos);
-  void setLookat(Point3 &v);
-  Point3 getPos() const;
-  Vec3 getLookat() const;
+  void set_pos(Point3 &pos);
+  void set_lookat(Point3 &v);
+  Point3 get_pos() const;
+  Vec3 get_lookat() const;
   void build_buffer(Mesh &mesh);
   void render(MeshList& scene);
   const std::vector<float> &get_buffer() const;
@@ -33,13 +33,13 @@ private:
   Matf4 camMat;
   float viewportWidth;
   float viewportHeight;
-  size_t pixelsX;
-  size_t pixelsY;
+  size_t pixelWidth;
+  size_t pixelHeight;
   std::vector<float> imgBuffer;
   Point3h defaultPos = Point3h(0, 0, 0);
-  Point3h &camToScreen(const Point3h &src_pt, Point3h &dst_pt) const;
-  Point3h &screenToRaster(const Point3h &src_pt, Point3h &dst_pt) const;
-  Point3h &computePixelCoordinate(const Point3h &src_pt, Point3h &dst_pt) const;
+  Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
+  Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
+  Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
   bool pineda_edge(float x, float y, Point3h p0, Point3h p1);
 };
 

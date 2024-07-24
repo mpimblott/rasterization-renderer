@@ -18,8 +18,6 @@ int main()
   // std::cout << triangle << std::endl;
   MeshList world;
   world.add(std::make_shared<Mesh>(triangle));
-  // Mesh projection = cam.build_projection(triangle);
-  // cam.test_point(277, 220, projection);
 
   cam.build_buffer(triangle);
   ppmRenderer renderer;
