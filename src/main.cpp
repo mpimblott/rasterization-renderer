@@ -13,12 +13,15 @@
 int main()
 {
   // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
-  std::vector<Point3h> vertices = {{0, 2, -5}, {0, 0, -5}, {1, 0, -5}};
-  std::cout << vertices[2] << std::endl;
-  std::vector<size_t> indices = {0, 2, 1, 0}; 
-  Mesh triangle(vertices, indices);
-  std::cout << triangle << std::endl;
   Camera cam(4, 4, 500, 500);
-  Point3h test_point = Point3h(0.1, 0.1, -5);
-  std::cout << triangle.test_point(test_point) << std::endl;
+  Mesh triangle({{1, 3, -5}, {3, 1, -5}, {1, 1, -5}}, {0, 2, 1, 0});
+  // std::cout << triangle << std::endl;
+  MeshList world;
+  world.add(std::make_shared<Mesh>(triangle));
+  // Mesh projection = cam.build_projection(triangle);
+  // cam.test_point(277, 220, projection);
+
+  cam.build_buffer(triangle);
+  ppmRenderer renderer;
+  renderer.render(500, 500, cam.get_buffer());
 }

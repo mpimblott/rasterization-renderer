@@ -44,18 +44,12 @@ const std::vector<size_t> &Mesh::get_indices() const
   return indices;
 }
 
-bool Mesh::pineda_edge(Point3h pTest, Point3h p0, Point3h p1)
+void Mesh::add_vertex(Point3h p)
 {
-  return (((pTest.x() - p0.x()) * (p1.y() - p0.y()) - (pTest.y() - p0.y()) * (p1.x() - p0.x())) >= 0);
+  vertices.push_back(p);
 }
 
-bool Mesh::test_point(Point3h &p)
+void MeshList::add(shared_ptr<Mesh> mesh)
 {
-  bool t = true;
-  for (size_t i = 0; i < indices.size() - 1; i++)
-  {
-    std::cout << indices[i] << " -> " << indices[i + 1] << ": " << pineda_edge(p, vertices[indices[i]], vertices[indices[i + 1]]) << std::endl;
-    t = t && pineda_edge(p, vertices[indices[i]], vertices[indices[i + 1]]);
-  }
-  return t;
+  objects.push_back(mesh);
 }

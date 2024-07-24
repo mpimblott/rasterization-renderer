@@ -136,9 +136,7 @@ inline Point3h Point3h::unit() const
 inline Point3h rotateX(Point3h &v, float angle)
 {
   Matf4 m = {{1, 0, 0, 0}, {0, static_cast<float>(cos(angle)), static_cast<float>(-1 * sin(angle)), 0}, {0, static_cast<float>(sin(angle)), static_cast<float>(cos(angle)), 0}, {0, 0, 0, 1}};
-  std::cout << m * transpose(v) << std::endl;
   auto k = m * transpose(v);
-  std::cout << transpose(m * transpose(v)) << std::endl;
   return e1h;
 }
 
