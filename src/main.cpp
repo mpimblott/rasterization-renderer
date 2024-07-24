@@ -13,8 +13,8 @@
 int main()
 {
   // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
-  Camera cam(4, 4, 500, 500);
-  Mesh triangle({{1, 3, -5}, {3, 1, -5}, {1, 1, -5}}, {0, 2, 1, 0});
+  Camera cam(500, 500, 90, 1, 3);
+  Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1, 2, 0});
   // std::cout << triangle << std::endl;
   MeshList world;
   world.add(std::make_shared<Mesh>(triangle));

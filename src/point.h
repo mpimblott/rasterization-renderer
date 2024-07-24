@@ -6,6 +6,15 @@
 #include <vector>
 #include <cmath>
 
+class Point3;
+class Point3h;
+
+Point3h operator*(float lhs, const Point3h &rhs);
+
+Point3h operator*(const Point3h &lhs, float rhs);
+
+Point3h operator*(const Point3h &lhs, const Matf4 &rhs);
+
 class Point3 : public Vec<float, 3>
 {
 public:
@@ -38,6 +47,9 @@ public:
   float norm() const;
   Point3h unit() const;
   Point3h &operator=(const Point3h &v);
+  friend Point3h operator*(float lhs, const Point3h &rhs);
+  friend Point3h operator*(const Point3h &lhs, float rhs);
+  friend Point3h operator*(const Point3h &lhs, const Matf4 &rhs);
 };
 
 const Point3h e1h = {1, 0, 0};

@@ -15,31 +15,38 @@ using colour = float;
 class Camera
 {
 public:
-  Camera(float viewportWidth, float viewportHeight, size_t pixelsX, size_t pixelsY);
-  Matf4 wld2cam() const;
-  Matf4 cam2wld() const;
+  Camera(size_t width, size_t height, float fov, float nearClipping, float farClipping);
+  const Matf4 &world_to_cam_mat() const;
+  const Matf4 cam_to_world_mat() const;
+  const Matf4 &projection_mat() const;
+  void set_near_clipping_distance(float distance);
+  void set_far_clipping_distance(float distance);
+  void set_fov(float angle);
   void set_pos(Point3 &pos);
-  void set_lookat(Point3 &v);
   Point3 get_pos() const;
-  Vec3 get_lookat() const;
   void build_buffer(Mesh &mesh);
-  void render(MeshList& scene);
   const std::vector<float> &get_buffer() const;
-  Mesh build_projection(Mesh &mesh);
-  bool test_point(float x, float y, Mesh &mesh);
+  void vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out);
 
 private:
   void init();
   Matf4 camMat;
+  Matf4 projectionMat;
+  void recompute_projection_mat();
   float viewportWidth;
   float viewportHeight;
   size_t pixelWidth;
   size_t pixelHeight;
+  float nearClippingDistance = 1;
+  float farClippingDistance = 6;
+  float fov = 90;
   std::vector<float> imgBuffer;
   Point3h defaultPos = Point3h(0, 0, 0);
   Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
   Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
   Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
+  Mesh build_projection(Mesh &mesh);
+  bool test_point(float x, float y, Mesh &mesh);
   bool pineda_edge(float x, float y, Point3h p0, Point3h p1);
 };
 

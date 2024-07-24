@@ -16,32 +16,32 @@ inline Point3::Point3(float x, float y, float z)
   data[2] = z;
 }
 
-inline float& Point3::x()
+inline float &Point3::x()
 {
   return data[0];
 }
 
-inline float& Point3::y()
+inline float &Point3::y()
 {
   return data[1];
 }
 
-inline float& Point3::z()
+inline float &Point3::z()
 {
   return data[2];
 }
 
-inline const float& Point3::x() const
+inline const float &Point3::x() const
 {
   return data[0];
 }
 
-inline const float& Point3::y() const
+inline const float &Point3::y() const
 {
   return data[1];
 }
 
-inline const float& Point3::z() const
+inline const float &Point3::z() const
 {
   return data[2];
 }
@@ -92,32 +92,32 @@ inline Point3h::Point3h(float x, float y, float z)
   data[3] = 1;
 }
 
-inline float& Point3h::x()
+inline float &Point3h::x()
 {
   return data[0];
 }
 
-inline float& Point3h::y()
+inline float &Point3h::y()
 {
   return data[1];
 }
 
-inline float& Point3h::z()
+inline float &Point3h::z()
 {
   return data[2];
 }
 
-inline const float& Point3h::x() const
+inline const float &Point3h::x() const
 {
   return data[0];
 }
 
-inline const float& Point3h::y() const
+inline const float &Point3h::y() const
 {
   return data[1];
 }
 
-inline const float& Point3h::z() const
+inline const float &Point3h::z() const
 {
   return data[2];
 }
@@ -147,4 +147,29 @@ inline Point3h &Point3h::operator=(const Point3h &v)
     data[i] = v[i];
   }
   return *this;
+}
+
+inline Point3h operator*(float lhs, const Point3h &rhs)
+{
+  return Point3h(rhs[0]*lhs, rhs[1]*lhs, rhs[2]*lhs);
+}
+
+inline Point3h operator*(const Point3h &lhs, float rhs)
+{
+  return Point3h(lhs[0]*rhs, lhs[1]*rhs, lhs[2]*rhs);
+}
+
+inline Point3h operator*(const Point3h &lhs, const Matf4 &rhs)
+{
+  float a = lhs[0] * rhs[0][0] + lhs[1] * rhs[1][0] + lhs[2] * rhs[2][0] + lhs[3] * rhs[3][0];
+  float b = lhs[0] * rhs[0][1] + lhs[1] * rhs[1][1] + lhs[2] * rhs[2][1] + lhs[3] * rhs[3][1];
+  float c = lhs[0] * rhs[0][2] + lhs[1] * rhs[1][2] + lhs[2] * rhs[2][2] + lhs[3] * rhs[3][2];
+  float w = lhs[0] * rhs[0][3] + lhs[1] * rhs[1][3] + lhs[2] * rhs[2][3] + lhs[3] * rhs[3][3];
+  if (w != 1)
+  {
+    a = a / w;
+    b = b / w;
+    c = c / w;
+  }
+  return Point3h(a, b, c);
 }

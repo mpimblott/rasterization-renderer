@@ -1,29 +1,65 @@
 #include "camera.h"
 
-Camera::Camera(float viewportWidth, float viewportHeight, size_t pixelsX, size_t pixelsY)
+Camera::Camera(size_t width, size_t height, float fov, float nearClipping, float farClipping)
 {
-  this->viewportWidth = viewportWidth;
-  this->viewportHeight = viewportHeight;
-  this->pixelWidth = pixelsX;
-  this->pixelHeight = pixelsY;
+  pixelWidth = width;
+  pixelHeight = height;
+  this->fov = fov;
+  nearClippingDistance = nearClipping;
+  farClippingDistance = farClipping;
   init();
 }
 
 void Camera::init()
 {
   Id(camMat);
+  recompute_projection_mat();
   std::vector<float> tmp(pixelWidth * pixelHeight * 3);
   imgBuffer = tmp;
 }
 
-Matf4 Camera::wld2cam() const
+const Matf4 &Camera::world_to_cam_mat() const
 {
   return camMat;
 }
 
-Matf4 Camera::cam2wld() const
+const Matf4 Camera::cam_to_world_mat() const
 {
   return inv(camMat);
+}
+
+const Matf4 &Camera::projection_mat() const
+{
+  return projectionMat;
+}
+
+void Camera::set_near_clipping_distance(float distance)
+{
+  nearClippingDistance = distance;
+  recompute_projection_mat();
+}
+
+void Camera::set_far_clipping_distance(float distance)
+{
+  farClippingDistance = distance;
+  recompute_projection_mat();
+}
+
+void Camera::set_fov(float angle)
+{
+  fov = angle;
+  recompute_projection_mat();
+}
+
+void Camera::recompute_projection_mat()
+{
+  // this matrix maps from screen space to NDC space ([-1,1]) accounting for clipping and fov
+  // should be pre-multiplication by worldToCam and after should be normalised to [0, 1] for raster space
+  float s = (static_cast<float>(1/tan((fov/2)*(pi/180))));
+  projectionMat = {{s, 0, 0, 0},
+                   {0, s, 0, 0},
+                   {0, 0, (-1 * farClippingDistance) / (farClippingDistance - nearClippingDistance), -1},
+                   {0, 0, (-1 * farClippingDistance * nearClippingDistance) / (farClippingDistance - nearClippingDistance), 0}};
 }
 
 void Camera::set_pos(Point3 &p)
@@ -37,12 +73,6 @@ void Camera::set_pos(Point3 &p)
 Point3 Camera::get_pos() const
 {
   return Point3(camMat[3][0], camMat[3][1], camMat[3][2]);
-}
-
-void Camera::set_lookat(Point3 &v)
-{
-  Point3 pos = get_pos();
-  Vec<float, 3> lookatVector = v - pos;
 }
 
 Point3h &Camera::cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const
@@ -76,6 +106,7 @@ Point3h &Camera::compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt
   return dst_pt;
 }
 
+
 Mesh Camera::build_projection(Mesh &mesh)
 {
   Mesh projection;
@@ -84,7 +115,7 @@ Mesh Camera::build_projection(Mesh &mesh)
   {
     // create a new mesh with the projections of the points
     Point3h p;
-    compute_pixel_coordinate(vertex, p);
+    vertex_shader(vertex, projection_mat(), world_to_cam_mat(), p);
     projection.add_vertex(p);
   }
   return projection;
@@ -103,7 +134,9 @@ void Camera::build_buffer(Mesh &mesh)
       {
         imgBuffer[idx] = 1.0;
         // std::cout << "true" << std::endl;
-      } else {
+      }
+      else
+      {
         imgBuffer[idx + 1] = 0.1;
       }
     }
@@ -147,4 +180,12 @@ void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &
     }
   }
   std::clog << "\rDone.                       \n";
+}
+
+void Camera::vertex_shader(const Point3h& vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out)
+{
+  out = vertex * worldToCameraMatrix;
+  out = out * projectionMatrix;
+  out.x() = std::floor((out.x() + 1) * 0.5 * pixelWidth); 
+  out.y() = std::floor((1 - (out.y() + 1) * 0.5) * pixelHeight); 
 }
