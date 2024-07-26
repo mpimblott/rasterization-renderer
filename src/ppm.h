@@ -1,9 +1,9 @@
 #pragma once
 
-#include "point.h"
-
 #include <cmath>
 #include <iostream>
+
+#include "point.h"
 
 using Color = Point3;
 
