@@ -180,17 +180,17 @@ inline Point3h operator*(const Point3h &lhs, float rhs)
 
 inline Point3h operator*(const Point3h &lhs, const Matf4 &rhs)
 {
-  float a = lhs[0] * rhs[0][0] + lhs[1] * rhs[1][0] + lhs[2] * rhs[2][0] + rhs[3][0];
-  float b = lhs[0] * rhs[0][1] + lhs[1] * rhs[1][1] + lhs[2] * rhs[2][1] + rhs[3][1];
-  float c = lhs[0] * rhs[0][2] + lhs[1] * rhs[1][2] + lhs[2] * rhs[2][2] + rhs[3][2];
+  float x = lhs[0] * rhs[0][0] + lhs[1] * rhs[1][0] + lhs[2] * rhs[2][0] + rhs[3][0];
+  float y = lhs[0] * rhs[0][1] + lhs[1] * rhs[1][1] + lhs[2] * rhs[2][1] + rhs[3][1];
+  float z = lhs[0] * rhs[0][2] + lhs[1] * rhs[1][2] + lhs[2] * rhs[2][2] + rhs[3][2];
   float w = lhs[0] * rhs[0][3] + lhs[1] * rhs[1][3] + lhs[2] * rhs[2][3] + rhs[3][3];
   if (w != 1)
   {
-    a = a / w;
-    b = b / w;
-    c = c / w;
+    x = x / w;
+    y = y / w;
+    z = z / w;
   }
-  return Point3h(a, b, c);
+  return Point3h(x, y, z);
 }
 
 inline Point3h cross(const Point3h &lhs, const Point3h &rhs)

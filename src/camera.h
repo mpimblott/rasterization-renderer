@@ -1,6 +1,8 @@
 #pragma once
 
-#include "memory"
+#include <memory>
+#include <limits>
+#include <cstdlib>
 
 #include "vector.h"
 #include "point.h"
@@ -46,7 +48,6 @@ private:
   Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
   Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
   std::vector<Point3h> project_vertices(const Mesh &meshPtr);
-  // bool find_containing_faces(float x, float y, Mesh &mesh);
   float pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1);
 };
 

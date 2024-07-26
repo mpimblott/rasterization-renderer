@@ -1,18 +1,19 @@
 #include "camera.h"
 
-Camera::Camera(size_t width, size_t height, float fov, float nearClipping, float farClipping)
+Camera::Camera(size_t width, size_t height, float fov, float nearClipping, float farClipping) :
+  pixelWidth(width),
+  pixelHeight(height),
+  fov(fov),
+  nearClippingDistance(nearClipping),
+  farClippingDistance(farClipping)
 {
-  pixelWidth = width;
-  pixelHeight = height;
-  this->fov = fov;
-  nearClippingDistance = nearClipping;
-  farClippingDistance = farClipping;
   init();
 }
 
 void Camera::init()
 {
   Id(camMat);
+  camMat[2][2] = -1;
   recompute_projection_mat();
 }
 
@@ -53,11 +54,11 @@ void Camera::recompute_projection_mat()
 {
   // this matrix maps from screen space to NDC space ([-1,1]) accounting for clipping and fov
   // should be pre-multiplication by worldToCam and after should be normalised to [0, 1] for raster space
-  float s = (static_cast<float>(1 / tan((fov / 2) * (pi / 180))));
+  float s = (static_cast<float>(1 / tan((fov *0.5 * pi / 180))));
   projectionMat = {{s, 0, 0, 0},
                    {0, s, 0, 0},
                    {0, 0, (-1 * farClippingDistance) / (farClippingDistance - nearClippingDistance), -1},
-                   {0, 0, (-1 * farClippingDistance * nearClippingDistance) / (farClippingDistance - nearClippingDistance), 0}};
+                   {0, 0, (- 1 * farClippingDistance * nearClippingDistance) / (farClippingDistance - nearClippingDistance), 0}};
 }
 
 void Camera::set_pos(Point3 &p)
@@ -110,7 +111,6 @@ std::vector<Point3h> Camera::project_vertices(const Mesh &mesh)
   std::vector<Point3h> projected_vertices(vertices.size());
   for (size_t i = 0; i < vertices.size(); i++)
   {
-    // create a new mesh with the projections of the points
     Point3h p;
     vertex_shader(vertices[i], projection_mat(), world_to_cam_mat(), p);
     projected_vertices[i] = p;
@@ -126,21 +126,40 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
     std::cerr << v << std::endl;
   }
   std::vector<float> buffer(pixelWidth * pixelHeight * 3);
+  std::vector<float> depthBuffer(pixelWidth * pixelHeight, std::numeric_limits<float>::max());
   for (size_t y = 0; y < pixelHeight; y++)
   {
     for (size_t x = 0; x < pixelWidth; x++)
     {
-      size_t bufferIdx = y * pixelHeight * 3 + 3 * x;
+      size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
       // for each face in the mesh
       for (size_t f = 0; f < mesh.get_n_faces(); f++)
       {
-        const size_t startVertIdx = f * 3;
-        Point3h p = Point3h(x, y, 1);
-        Point3h &p0 = projectedVertices[startVertIdx];
-        Point3h &p1 = projectedVertices[startVertIdx + 1];
-        Point3h &p2 = projectedVertices[startVertIdx + 2];
-        const size_t &verticesInFace = mesh.get_vertices_in_face_at_idx(f);
-        assert(verticesInFace == 3 && "face must be triangle");
+        const size_t verticesInFace = 3;
+        const size_t startVertIdx = f * verticesInFace;
+
+        const size_t p1Idx = mesh.get_vertex_order_idx(startVertIdx);
+        const size_t p2Idx = mesh.get_vertex_order_idx(startVertIdx + 1);
+        const size_t p3Idx = mesh.get_vertex_order_idx(startVertIdx + 2);
+
+        Point3h p = Point3h(x, y , 1000000);
+        Point3h p0 = projectedVertices[p1Idx];
+        Point3h p1 = projectedVertices[p2Idx];
+        Point3h p2 = projectedVertices[p3Idx];
+
+        // vertex colours
+
+        Vec<float, 3> c0 = mesh.get_vertex_colour(p1Idx);
+        Vec<float, 3> c1 = mesh.get_vertex_colour(p2Idx);
+        Vec<float, 3> c2 = mesh.get_vertex_colour(p3Idx);
+
+        // perspective-correct vertex attribute interpolation
+        c0[0] /= p0[2], c0[1] /= p0[2], c0[2] /= p0[2];
+        c1[0] /= p1[2], c1[1] /= p1[2], c1[2] /= p1[2];
+        c2[0] /= p2[2], c2[1] /= p2[2], c2[2] /= p2[2];
+
+        // vertex z-coordinate inversion
+        p0[2] = 1 / p0[2], p1[2] = 1 / p1[2], p2[2] = 1 / p2[2];
 
         float area = pineda_edge(p0, p1, p2);
         float w0 = pineda_edge(p, p1, p2);
@@ -162,9 +181,21 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
           w0 /= area;
           w1 /= area;
           w2 /= area;
-          buffer[bufferIdx] = w0;
-          buffer[bufferIdx + 1] = w1;
-          buffer[bufferIdx + 2] = w2;
+          float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
+          float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
+          float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
+
+          // multiply by z for perspective correct interpolation
+          float z = 1 / (w0 * p0[2] + w1 * p1[2] + w2 * p2[2]);
+          std::cerr << z << std::endl;
+          if (z < depthBuffer[bufferIdx/3])
+          {
+          depthBuffer[bufferIdx/3] = z;
+          r *= z, g *= z, b *= z;
+          buffer[bufferIdx] = r;
+          buffer[bufferIdx + 1] = g;
+          buffer[bufferIdx + 2] = b;
+          }
         }
       }
     }
@@ -176,18 +207,6 @@ float Camera::pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1
 {
   return (p.x() - p0.x()) * (p1.y() - p0.y()) - (p.y() - p0.y()) * (p1.x() - p0.x());
 }
-/*
-  Apply the pineda edge test to see if the pixel lies inside the projection of the polygon
-*/
-// bool Camera::find_containing_faces(float x, float y, Mesh &mesh)
-// {
-//   bool t = true;
-//   for (size_t i = 0; i < mesh.get_total_non_unique_vertices() - 1; i++)
-//   {
-//     t = t && pineda_edge(x, y, mesh.get_vertex(mesh.get_vertex_order_idx(i)), mesh.get_vertex(mesh.get_vertex_order_idx(i + 1)));
-//   }
-//   return t;
-// }
 
 void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &imgBuffer)
 {
@@ -210,8 +229,11 @@ void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &
 
 void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out)
 {
+  std::cerr << "shader" << std::endl;
   out = vertex * worldToCameraMatrix;
   out = out * projectionMatrix;
-  out.x() = std::floor((out.x() + 1) * 0.5 * pixelWidth);
-  out.y() = std::floor((1 - (out.y() + 1) * 0.5) * pixelHeight);
+  if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1) return;
+  // convert to raster space
+  out.x() = std::min((uint32_t)(pixelWidth - 1), (uint32_t)((out.x() + 1) * 0.5 * pixelWidth)); 
+  out.y() = std::min((uint32_t)(pixelHeight - 1), (uint32_t)((1 - (out.y() + 1) * 0.5) * pixelHeight));
 }

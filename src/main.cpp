@@ -16,15 +16,14 @@ using std::shared_ptr;
 int main()
 {
   // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
-  Camera cam(500, 500, 90, 1, 3);
+  Camera cam(500, 500, 90, 40, 120);
   // Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1, 2, 0});
   // std::cout << triangle << std::endl;
 
   // cam.build_img_buffer(triangle);
   ppmRenderer renderer;
-  shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle.mesh");
+  shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle_single.mesh");
   std::cerr << (*mesh) << std::endl;
   std::vector<float> img_buffer = cam.build_img_buffer(*mesh);
   renderer.render(500, 500, img_buffer);
-
 }

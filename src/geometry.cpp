@@ -20,17 +20,7 @@ std::ostream &operator<<(std::ostream &os, const Mesh &mesh)
 
 const size_t Mesh::get_n_faces() const
 {
-  return (*verticesInFace).size();
-}
-
-const std::vector<size_t> &Mesh::get_vertices_in_face() const
-{
-  return *verticesInFace;
-}
-
-const size_t &Mesh::get_vertices_in_face_at_idx(size_t i) const
-{
-  return (*verticesInFace)[i];
+  return (*vertices).size() / 3;
 }
 
 const size_t &Mesh::get_total_non_unique_vertices() const
@@ -75,18 +65,23 @@ const std::vector<Vec<float, 2>> &Mesh::get_texture_coordinates() const
   return *textureCoordinates;
 }
 
+const Vec<float, 3> &Mesh::get_vertex_colour(size_t i) const
+{
+  return (*vertexColours)[i];
+}
+
 Mesh::Mesh(
-    std::unique_ptr<std::vector<size_t>> verticesInFace,
     size_t totalNonUniqueVertices,
-    std::unique_ptr<std::vector<size_t>> vertexOrderingIndices,
-    std::unique_ptr<std::vector<Point3h>> vertices,
-    std::unique_ptr<std::vector<Point3h>> normals,
-    std::unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates) : verticesInFace(std::move(verticesInFace)),
-                                                                      totalNonUniqueVertices(totalNonUniqueVertices),
-                                                                      vertexOrderingIndices(std::move(vertexOrderingIndices)),
-                                                                      vertices(std::move(vertices)),
-                                                                      normals(std::move(normals)),
-                                                                      textureCoordinates(std::move(textureCoordinates)) {}
+    unique_ptr<std::vector<size_t>> vertexOrderingIndices,
+    unique_ptr<std::vector<Point3h>> vertices,
+    unique_ptr<std::vector<Point3h>> normals,
+    unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates,
+    unique_ptr<std::vector<Vec<float, 3>>> vertexColours) : totalNonUniqueVertices(totalNonUniqueVertices),
+                                                            vertexOrderingIndices(std::move(vertexOrderingIndices)),
+                                                            vertices(std::move(vertices)),
+                                                            normals(std::move(normals)),
+                                                            textureCoordinates(std::move(textureCoordinates)),
+                                                            vertexColours(std::move(vertexColours)) {}
 
 void MeshList::add(shared_ptr<Mesh> mesh)
 {
