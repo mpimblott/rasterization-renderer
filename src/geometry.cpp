@@ -2,15 +2,15 @@
 
 std::ostream &operator<<(std::ostream &os, const Mesh &mesh)
 {
-    os << "[Mesh - verts: ";
+  os << "[Mesh - verts: ";
   const std::vector<Point3h> &verts = mesh.get_vertices();
-  const std::vector<size_t> &indcs = mesh.get_indices();
+  const std::vector<size_t> &indcs = mesh.get_vertex_ordering_indices();
   for (size_t i = 0; i < verts.size(); i++)
   {
     os << verts[i] << ", ";
   }
   os << "indcs: ";
-    for (size_t i = 0; i < indcs.size(); i++)
+  for (size_t i = 0; i < indcs.size(); i++)
   {
     os << indcs[i] << ", ";
   }
@@ -18,36 +18,75 @@ std::ostream &operator<<(std::ostream &os, const Mesh &mesh)
   return os;
 }
 
-Mesh::Mesh(std::vector<Point3h> vertices, std::vector<size_t> indices)
+const size_t Mesh::get_n_faces() const
 {
-  this->vertices = vertices;
-  this->indices = indices;
+  return (*verticesInFace).size();
 }
 
-void Mesh::set_indices(std::vector<size_t> indices)
+const std::vector<size_t> &Mesh::get_vertices_in_face() const
 {
-  this->indices = indices;
+  return *verticesInFace;
 }
 
-void Mesh::set_vertices(std::vector<Point3h> vertices)
+const size_t &Mesh::get_vertices_in_face_at_idx(size_t i) const
 {
-  this->vertices = vertices;
+  return (*verticesInFace)[i];
+}
+
+const size_t &Mesh::get_total_non_unique_vertices() const
+{
+  return totalNonUniqueVertices;
+}
+
+const std::vector<size_t> &Mesh::get_vertex_ordering_indices() const
+{
+  return *vertexOrderingIndices;
+}
+
+const size_t &Mesh::get_vertex_order_idx(size_t i) const
+{
+  assert(i < (*vertexOrderingIndices).size() && "Attempt to access mesh ordering index out of bounds.");
+  return (*vertexOrderingIndices)[i];
+}
+
+const size_t Mesh::get_n_vertices() const
+{
+  return (*vertices).size();
 }
 
 const std::vector<Point3h> &Mesh::get_vertices() const
 {
-  return vertices;
+  return *vertices.get();
 }
 
-const std::vector<size_t> &Mesh::get_indices() const
+const Point3h &Mesh::get_vertex(size_t i) const
 {
-  return indices;
+  assert(i < (*vertices).size() && "Attempt to access mesh vertex out of bounds.");
+  return (*vertices)[i];
 }
 
-void Mesh::add_vertex(Point3h p)
+const std::vector<Point3h> &Mesh::get_normals() const
 {
-  vertices.push_back(p);
+  return *normals.get();
 }
+
+const std::vector<Vec<float, 2>> &Mesh::get_texture_coordinates() const
+{
+  return *textureCoordinates;
+}
+
+Mesh::Mesh(
+    std::unique_ptr<std::vector<size_t>> verticesInFace,
+    size_t totalNonUniqueVertices,
+    std::unique_ptr<std::vector<size_t>> vertexOrderingIndices,
+    std::unique_ptr<std::vector<Point3h>> vertices,
+    std::unique_ptr<std::vector<Point3h>> normals,
+    std::unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates) : verticesInFace(std::move(verticesInFace)),
+                                                                      totalNonUniqueVertices(totalNonUniqueVertices),
+                                                                      vertexOrderingIndices(std::move(vertexOrderingIndices)),
+                                                                      vertices(std::move(vertices)),
+                                                                      normals(std::move(normals)),
+                                                                      textureCoordinates(std::move(textureCoordinates)) {}
 
 void MeshList::add(shared_ptr<Mesh> mesh)
 {

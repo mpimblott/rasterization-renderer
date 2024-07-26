@@ -8,8 +8,8 @@
 #include "ppm.h"
 #include "geometry.h"
 
-using std::shared_ptr;
 using std::make_shared;
+using std::shared_ptr;
 using colour = float;
 
 class Camera
@@ -24,9 +24,10 @@ public:
   void set_fov(float angle);
   void set_pos(Point3 &pos);
   Point3 get_pos() const;
-  void build_buffer(Mesh &mesh);
-  const std::vector<float> &get_buffer() const;
-  void vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out);
+  std::vector<float> build_img_buffer(const Mesh &mesh);
+  void vertex_shader(const Point3h &vertex,
+                     const Matf4 &projectionMatrix,
+                     const Matf4 &worldToCameraMatrix, Point3h &out);
 
 private:
   void init();
@@ -40,13 +41,12 @@ private:
   float nearClippingDistance = 1;
   float farClippingDistance = 6;
   float fov = 90;
-  std::vector<float> imgBuffer;
   Point3h defaultPos = Point3h(0, 0, 0);
   Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
   Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
   Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
-  Mesh build_projection(Mesh &mesh);
-  bool test_point(float x, float y, Mesh &mesh);
+  std::vector<Point3h> project_vertices(const Mesh &meshPtr);
+  bool find_containing_faces(float x, float y, Mesh &mesh);
   bool pineda_edge(float x, float y, Point3h p0, Point3h p1);
 };
 
@@ -58,7 +58,8 @@ public:
   virtual void render(size_t width, size_t height, const std::vector<float> &imgBuffer) = 0;
 };
 
-class ppmRenderer: public Renderer {
+class ppmRenderer : public Renderer
+{
 public:
   void render(size_t width, size_t height, const std::vector<float> &imgBuffer) override;
 };

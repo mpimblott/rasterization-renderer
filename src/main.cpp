@@ -1,9 +1,12 @@
 #include <iostream>
+#include <memory>
 #include "vector.h"
 #include "point.h"
 #include "geometry.h"
 #include "camera.h"
 #include "geom_util.h"
+
+using std::shared_ptr;
 
   // Matf4 ltw = { {0.718762, 0.615033, -0.324324, 0},
   //               {-0.393732, 0.744416, 0.539277, 0},
@@ -14,12 +17,14 @@ int main()
 {
   // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
   Camera cam(500, 500, 90, 1, 3);
-  Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1, 2, 0});
+  // Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1, 2, 0});
   // std::cout << triangle << std::endl;
-  MeshList world;
-  world.add(std::make_shared<Mesh>(triangle));
 
-  cam.build_buffer(triangle);
+  // cam.build_img_buffer(triangle);
   ppmRenderer renderer;
-  renderer.render(500, 500, cam.get_buffer());
+  shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle.mesh");
+  std::cerr << (*mesh) << std::endl;
+  std::vector<float> img_buffer = cam.build_img_buffer(*mesh);
+  renderer.render(500, 500, img_buffer);
+
 }

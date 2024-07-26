@@ -15,6 +15,8 @@ Point3h operator*(const Point3h &lhs, float rhs);
 
 Point3h operator*(const Point3h &lhs, const Matf4 &rhs);
 
+Point3h cross(const Point3h &lhs, const Point3h &rhs);
+
 class Point3 : public Vec<float, 3>
 {
 public:
@@ -45,6 +47,7 @@ public:
   const float &y() const;
   const float &z() const;
   float norm() const;
+  Point3h &normalise();
   Point3h unit() const;
   Point3h &operator=(const Point3h &v);
   friend Point3h operator*(float lhs, const Point3h &rhs);

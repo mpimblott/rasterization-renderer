@@ -14,8 +14,6 @@ void Camera::init()
 {
   Id(camMat);
   recompute_projection_mat();
-  std::vector<float> tmp(pixelWidth * pixelHeight * 3);
-  imgBuffer = tmp;
 }
 
 const Matf4 &Camera::world_to_cam_mat() const
@@ -55,7 +53,7 @@ void Camera::recompute_projection_mat()
 {
   // this matrix maps from screen space to NDC space ([-1,1]) accounting for clipping and fov
   // should be pre-multiplication by worldToCam and after should be normalised to [0, 1] for raster space
-  float s = (static_cast<float>(1/tan((fov/2)*(pi/180))));
+  float s = (static_cast<float>(1 / tan((fov / 2) * (pi / 180))));
   projectionMat = {{s, 0, 0, 0},
                    {0, s, 0, 0},
                    {0, 0, (-1 * farClippingDistance) / (farClippingDistance - nearClippingDistance), -1},
@@ -106,59 +104,81 @@ Point3h &Camera::compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt
   return dst_pt;
 }
 
-
-Mesh Camera::build_projection(Mesh &mesh)
+std::vector<Point3h> Camera::project_vertices(const Mesh &mesh)
 {
-  Mesh projection;
-  projection.set_indices(mesh.get_indices());
-  for (const auto &vertex : mesh.get_vertices())
+  const std::vector<Point3h> &vertices = mesh.get_vertices();
+  std::vector<Point3h> projected_vertices(vertices.size());
+  for (size_t i = 0; i < vertices.size(); i++)
   {
     // create a new mesh with the projections of the points
     Point3h p;
-    vertex_shader(vertex, projection_mat(), world_to_cam_mat(), p);
-    projection.add_vertex(p);
+    vertex_shader(vertices[i], projection_mat(), world_to_cam_mat(), p);
+    projected_vertices[i] = p;
   }
-  return projection;
+  return projected_vertices;
 }
 
-void Camera::build_buffer(Mesh &mesh)
+std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
 {
-  Mesh projection = build_projection(mesh);
-  // std::cout << projection << std::endl;
+  std::vector<Point3h> projectedVertices = project_vertices(mesh);
+  for (auto &v : projectedVertices)
+  {
+    std::cerr << v << std::endl;
+  }
+  std::vector<float> buffer(pixelWidth * pixelHeight * 3);
   for (size_t y = 0; y < pixelHeight; y++)
   {
     for (size_t x = 0; x < pixelWidth; x++)
     {
-      size_t idx = y * pixelHeight * 3 + 3 * x;
-      if (test_point(x, y, projection))
+      size_t bufferIdx = y * pixelHeight * 3 + 3 * x;
+      size_t vertexIdx = 0;
+      // for each face in the mesh
+      for (size_t f = 0; f < mesh.get_n_faces(); f++)
       {
-        imgBuffer[idx] = 1.0;
-        // std::cout << "true" << std::endl;
-      }
-      else
-      {
-        imgBuffer[idx + 1] = 0.1;
+        const size_t &verticesInFace = mesh.get_vertices_in_face_at_idx(f);
+        bool t = true;
+        // for each vertex in the face
+        for (size_t v = vertexIdx; v < vertexIdx + verticesInFace; v++)
+        {
+          size_t p0VertexIdx = mesh.get_vertex_order_idx(v);
+          size_t p1VertexIdx = mesh.get_vertex_order_idx(v+1);
+          t = t && pineda_edge(x, y, projectedVertices[p0VertexIdx], projectedVertices[p1VertexIdx]);
+          // mesh.get_vertex(mesh.get_vertex_order_idx(i)), mesh.get_vertex(mesh.get_vertex_order_idx(i + 1))
+        }
+
+        if (t)
+        {
+          buffer[bufferIdx] = 0;
+          buffer[bufferIdx + 1] = 0.5;
+          buffer[bufferIdx + 2] = 0;
+        }
+        else
+        {
+          buffer[bufferIdx] = 0.2;
+          buffer[bufferIdx + 1] = 0.2;
+          buffer[bufferIdx + 2] = 0;
+        }
+
+        vertexIdx += verticesInFace;
       }
     }
   }
-}
-
-const std::vector<float> &Camera::get_buffer() const
-{
-  return imgBuffer;
+  return buffer;
 }
 
 bool Camera::pineda_edge(float x, float y, Point3h p0, Point3h p1)
 {
   return (((x - p0.x()) * (p1.y() - p0.y()) - (y - p0.y()) * (p1.x() - p0.x())) >= 0);
 }
-
-bool Camera::test_point(float x, float y, Mesh &mesh)
+/*
+  Apply the pineda edge test to see if the pixel lies inside the projection of the polygon
+*/
+bool Camera::find_containing_faces(float x, float y, Mesh &mesh)
 {
   bool t = true;
-  for (size_t i = 0; i < mesh.get_indices().size() - 1; i++)
+  for (size_t i = 0; i < mesh.get_total_non_unique_vertices() - 1; i++)
   {
-    t = t && pineda_edge(x, y, mesh.get_vertices()[mesh.get_indices()[i]], mesh.get_vertices()[mesh.get_indices()[i + 1]]);
+    t = t && pineda_edge(x, y, mesh.get_vertex(mesh.get_vertex_order_idx(i)), mesh.get_vertex(mesh.get_vertex_order_idx(i + 1)));
   }
   return t;
 }
@@ -182,10 +202,10 @@ void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &
   std::clog << "\rDone.                       \n";
 }
 
-void Camera::vertex_shader(const Point3h& vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out)
+void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out)
 {
   out = vertex * worldToCameraMatrix;
   out = out * projectionMatrix;
-  out.x() = std::floor((out.x() + 1) * 0.5 * pixelWidth); 
-  out.y() = std::floor((1 - (out.y() + 1) * 0.5) * pixelHeight); 
+  out.x() = std::floor((out.x() + 1) * 0.5 * pixelWidth);
+  out.y() = std::floor((1 - (out.y() + 1) * 0.5) * pixelHeight);
 }

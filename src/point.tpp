@@ -127,6 +127,15 @@ inline float Point3h::norm() const
   return sqrt(pow(data[0], 2) + pow(data[1], 2) + pow(data[2], 2));
 }
 
+inline Point3h &Point3h::normalise()
+{
+  float n = norm();
+  data[0] /= n;
+  data[1] /= n;
+  data[2] /= n;
+  return *this;
+}
+
 inline Point3h Point3h::unit() const
 {
   float n = norm();
@@ -161,10 +170,10 @@ inline Point3h operator*(const Point3h &lhs, float rhs)
 
 inline Point3h operator*(const Point3h &lhs, const Matf4 &rhs)
 {
-  float a = lhs[0] * rhs[0][0] + lhs[1] * rhs[1][0] + lhs[2] * rhs[2][0] + lhs[3] * rhs[3][0];
-  float b = lhs[0] * rhs[0][1] + lhs[1] * rhs[1][1] + lhs[2] * rhs[2][1] + lhs[3] * rhs[3][1];
-  float c = lhs[0] * rhs[0][2] + lhs[1] * rhs[1][2] + lhs[2] * rhs[2][2] + lhs[3] * rhs[3][2];
-  float w = lhs[0] * rhs[0][3] + lhs[1] * rhs[1][3] + lhs[2] * rhs[2][3] + lhs[3] * rhs[3][3];
+  float a = lhs[0] * rhs[0][0] + lhs[1] * rhs[1][0] + lhs[2] * rhs[2][0] + rhs[3][0];
+  float b = lhs[0] * rhs[0][1] + lhs[1] * rhs[1][1] + lhs[2] * rhs[2][1] + rhs[3][1];
+  float c = lhs[0] * rhs[0][2] + lhs[1] * rhs[1][2] + lhs[2] * rhs[2][2] + rhs[3][2];
+  float w = lhs[0] * rhs[0][3] + lhs[1] * rhs[1][3] + lhs[2] * rhs[2][3] + rhs[3][3];
   if (w != 1)
   {
     a = a / w;
@@ -172,4 +181,12 @@ inline Point3h operator*(const Point3h &lhs, const Matf4 &rhs)
     c = c / w;
   }
   return Point3h(a, b, c);
+}
+
+inline Point3h cross(const Point3h &lhs, const Point3h &rhs)
+{
+  float a = lhs[1] * rhs[2] - lhs[2] * rhs[1];
+  float b = lhs[0] * rhs[2] - lhs[2] * rhs[0];
+  float c = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+  return Point3h(a, b , c);
 }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(Renderer)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(
@@ -14,5 +14,5 @@ add_executable(
   geom_util.cpp
   )
   
-target_compile_features(Renderer PRIVATE cxx_std_11)
+target_compile_features(Renderer PRIVATE cxx_std_14)
 
