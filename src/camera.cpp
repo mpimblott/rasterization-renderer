@@ -1,11 +1,10 @@
 #include "camera.h"
 
-Camera::Camera(size_t width, size_t height, float fov, float nearClipping, float farClipping) :
-  pixelWidth(width),
-  pixelHeight(height),
-  fov(fov),
-  nearClippingDistance(nearClipping),
-  farClippingDistance(farClipping)
+Camera::Camera(size_t width, size_t height, float fov, float nearClipping, float farClipping) : pixelWidth(width),
+                                                                                                pixelHeight(height),
+                                                                                                fov(fov),
+                                                                                                nearClippingDistance(nearClipping),
+                                                                                                farClippingDistance(farClipping)
 {
   init();
 }
@@ -54,11 +53,11 @@ void Camera::recompute_projection_mat()
 {
   // this matrix maps from screen space to NDC space ([-1,1]) accounting for clipping and fov
   // should be pre-multiplication by worldToCam and after should be normalised to [0, 1] for raster space
-  float s = (static_cast<float>(1 / tan((fov *0.5 * pi / 180))));
+  float s = (static_cast<float>(1 / tan((fov * 0.5 * pi / 180))));
   projectionMat = {{s, 0, 0, 0},
                    {0, s, 0, 0},
                    {0, 0, (-1 * farClippingDistance) / (farClippingDistance - nearClippingDistance), -1},
-                   {0, 0, (- 1 * farClippingDistance * nearClippingDistance) / (farClippingDistance - nearClippingDistance), 0}};
+                   {0, 0, (-1 * farClippingDistance * nearClippingDistance) / (farClippingDistance - nearClippingDistance), 0}};
 }
 
 void Camera::set_pos(Point3 &p)
@@ -127,28 +126,29 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
   }
   std::vector<float> buffer(pixelWidth * pixelHeight * 3);
   std::vector<float> depthBuffer(pixelWidth * pixelHeight, std::numeric_limits<float>::max());
-  for (size_t y = 0; y < pixelHeight; y++)
+  for (size_t f = 0; f < mesh.get_n_faces(); f++)
   {
-    for (size_t x = 0; x < pixelWidth; x++)
+    const size_t startVertIdx = f * 3; // 3 vertices in a triangle
+    const size_t &p1Idx = mesh.get_vertex_order_idx(startVertIdx);
+    const size_t &p2Idx = mesh.get_vertex_order_idx(startVertIdx + 1);
+    const size_t &p3Idx = mesh.get_vertex_order_idx(startVertIdx + 2);
+    const Point3h &p0 = projectedVertices[p1Idx];
+    const Point3h &p1 = projectedVertices[p2Idx];
+    const Point3h &p2 = projectedVertices[p3Idx];
+    size_t xmax;
+    size_t xmin;
+    size_t ymax;
+    size_t ymin;
+    std::tie(xmax, xmin, ymax, ymin) = triangle_raster_bbox(p0, p1, p2, pixelWidth, pixelHeight);
+
+    for (size_t y = ymin; y < ymax; y++)
     {
-      size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
-      // for each face in the mesh
-      for (size_t f = 0; f < mesh.get_n_faces(); f++)
+      for (size_t x = xmin; x < xmax; x++)
       {
-        const size_t verticesInFace = 3;
-        const size_t startVertIdx = f * verticesInFace;
-
-        const size_t p1Idx = mesh.get_vertex_order_idx(startVertIdx);
-        const size_t p2Idx = mesh.get_vertex_order_idx(startVertIdx + 1);
-        const size_t p3Idx = mesh.get_vertex_order_idx(startVertIdx + 2);
-
-        Point3h p = Point3h(x, y , 1000000);
-        Point3h p0 = projectedVertices[p1Idx];
-        Point3h p1 = projectedVertices[p2Idx];
-        Point3h p2 = projectedVertices[p3Idx];
-
+        Point3h p = Point3h(x, y, 1000000);
+        size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
+        // for each face in the mesh
         // vertex colours
-
         Vec<float, 3> c0 = mesh.get_vertex_colour(p1Idx);
         Vec<float, 3> c1 = mesh.get_vertex_colour(p2Idx);
         Vec<float, 3> c2 = mesh.get_vertex_colour(p3Idx);
@@ -159,7 +159,10 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
         c2[0] /= p2[2], c2[1] /= p2[2], c2[2] /= p2[2];
 
         // vertex z-coordinate inversion
-        p0[2] = 1 / p0[2], p1[2] = 1 / p1[2], p2[2] = 1 / p2[2];
+        // p0[2] = 1 / p0[2], p1[2] = 1 / p1[2], p2[2] = 1 / p2[2];
+        float p0y_inverted = 1 / p0[2];
+        float p1y_inverted = 1 / p1[2];
+        float p2y_inverted = 1 / p2[2];
 
         float area = pineda_edge(p0, p1, p2);
         float w0 = pineda_edge(p, p1, p2);
@@ -181,20 +184,17 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
           w0 /= area;
           w1 /= area;
           w2 /= area;
-          float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
-          float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
-          float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
 
-          // multiply by z for perspective correct interpolation
-          float z = 1 / (w0 * p0[2] + w1 * p1[2] + w2 * p2[2]);
-          std::cerr << z << std::endl;
-          if (z < depthBuffer[bufferIdx/3])
+          float z = 1 / (w0 * p0y_inverted + w1 * p1y_inverted + w2 * p2y_inverted);
+          if (z < depthBuffer[bufferIdx / 3])
           {
-          depthBuffer[bufferIdx/3] = z;
-          r *= z, g *= z, b *= z;
-          buffer[bufferIdx] = r;
-          buffer[bufferIdx + 1] = g;
-          buffer[bufferIdx + 2] = b;
+            depthBuffer[bufferIdx / 3] = z;
+            ColourRGBA rasterColour;
+            texture_shader(mesh, rasterColour, w0, w1, w2, c0, c1, c2, z);
+
+            buffer[bufferIdx] = rasterColour[0];
+            buffer[bufferIdx + 1] = rasterColour[1];
+            buffer[bufferIdx + 2] = rasterColour[2];
           }
         }
       }
@@ -206,6 +206,54 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
 float Camera::pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1)
 {
   return (p.x() - p0.x()) * (p1.y() - p0.y()) - (p.y() - p0.y()) * (p1.x() - p0.x());
+}
+
+inline std::tuple<size_t, size_t, size_t, size_t> Camera::triangle_raster_bbox(
+    const Point3h &a,
+    const Point3h &b,
+    const Point3h &c,
+    size_t xMaximumLimit,
+    size_t yMaximumLimit)
+{
+  size_t xmax = std::max({a.x(), b.x(), c.x()}) - 1;
+  size_t xmin = std::min({a.x(), b.x(), c.x()}) - 1;
+  size_t ymax = std::max({a.y(), b.y(), c.y()}) - 1;
+  size_t ymin = std::min({a.y(), b.y(), c.y()}) - 1;
+  xmax = std::min(xmax, xMaximumLimit);
+  xmin = std::max(xmin, (size_t)0);
+  ymax = std::min(ymax, yMaximumLimit);
+  ymin = std::max(ymin, (size_t)0);
+  return {xmax, xmin, ymax, ymin};
+}
+
+void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out)
+{
+  std::cerr << "shader" << std::endl;
+  out = vertex * worldToCameraMatrix;
+  out = out * projectionMatrix;
+  if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1)
+    return;
+  // convert to raster space
+  out.x() = std::min((uint32_t)(pixelWidth - 1), (uint32_t)((out.x() + 1) * 0.5 * pixelWidth));
+  out.y() = std::min((uint32_t)(pixelHeight - 1), (uint32_t)((1 - (out.y() + 1) * 0.5) * pixelHeight));
+}
+
+void Camera::texture_shader(
+    const Mesh &mesh,
+    ColourRGBA &out,
+    const float &w0,
+    const float &w1,
+    const float &w2,
+    const Vec<float, 3> &c0,
+    const Vec<float, 3> &c1,
+    const Vec<float, 3> &c2,
+    const float &z)
+{
+  float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
+  float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
+  float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
+  r *= z, g *= z, b *= z;
+  out[0] = r, out[1] = g, out[2] = b;
 }
 
 void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &imgBuffer)
@@ -225,15 +273,4 @@ void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &
     }
   }
   std::clog << "\rDone.                       \n";
-}
-
-void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix, Point3h &out)
-{
-  std::cerr << "shader" << std::endl;
-  out = vertex * worldToCameraMatrix;
-  out = out * projectionMatrix;
-  if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1) return;
-  // convert to raster space
-  out.x() = std::min((uint32_t)(pixelWidth - 1), (uint32_t)((out.x() + 1) * 0.5 * pixelWidth)); 
-  out.y() = std::min((uint32_t)(pixelHeight - 1), (uint32_t)((1 - (out.y() + 1) * 0.5) * pixelHeight));
 }

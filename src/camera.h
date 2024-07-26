@@ -3,6 +3,9 @@
 #include <memory>
 #include <limits>
 #include <cstdlib>
+#include <array>
+#include <algorithm>
+#include <tuple>
 
 #include "vector.h"
 #include "point.h"
@@ -13,6 +16,7 @@
 using std::make_shared;
 using std::shared_ptr;
 using colour = float;
+using ColourRGBA = Vec<float, 4>;
 
 class Camera
 {
@@ -30,6 +34,15 @@ public:
   void vertex_shader(const Point3h &vertex,
                      const Matf4 &projectionMatrix,
                      const Matf4 &worldToCameraMatrix, Point3h &out);
+  void texture_shader(const Mesh &mesh,
+                      ColourRGBA &out,
+                      const float &w0,
+                      const float &w1,
+                      const float &w2,
+                      const Vec<float, 3> &c0,
+                      const Vec<float, 3> &c1,
+                      const Vec<float, 3> &c2,
+                      const float &z);
 
 private:
   void init();
@@ -49,6 +62,13 @@ private:
   Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
   std::vector<Point3h> project_vertices(const Mesh &meshPtr);
   float pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1);
+  // returns [xmax, xmin, ymax, ymin] defining bbox in raster space
+  std::tuple<size_t, size_t, size_t, size_t> triangle_raster_bbox(
+      const Point3h &a,
+      const Point3h &b,
+      const Point3h &c,
+      size_t xMaximumLimit,
+      size_t yMaximumLimit);
 };
 
 class Renderer
