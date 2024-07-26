@@ -50,6 +50,8 @@ public:
   Point3h &normalise();
   Point3h unit() const;
   Point3h &operator=(const Point3h &v);
+  Point3h operator+(const Point3h &v) const;
+  Point3h operator-(const Point3h &v) const;
   friend Point3h operator*(float lhs, const Point3h &rhs);
   friend Point3h operator*(const Point3h &lhs, float rhs);
   friend Point3h operator*(const Point3h &lhs, const Matf4 &rhs);

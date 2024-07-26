@@ -131,57 +131,63 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh)
     for (size_t x = 0; x < pixelWidth; x++)
     {
       size_t bufferIdx = y * pixelHeight * 3 + 3 * x;
-      size_t vertexIdx = 0;
       // for each face in the mesh
       for (size_t f = 0; f < mesh.get_n_faces(); f++)
       {
+        const size_t startVertIdx = f * 3;
+        Point3h p = Point3h(x, y, 1);
+        Point3h &p0 = projectedVertices[startVertIdx];
+        Point3h &p1 = projectedVertices[startVertIdx + 1];
+        Point3h &p2 = projectedVertices[startVertIdx + 2];
         const size_t &verticesInFace = mesh.get_vertices_in_face_at_idx(f);
-        bool t = true;
-        // for each vertex in the face
-        for (size_t v = vertexIdx; v < vertexIdx + verticesInFace; v++)
-        {
-          size_t p0VertexIdx = mesh.get_vertex_order_idx(v);
-          size_t p1VertexIdx = mesh.get_vertex_order_idx(v+1);
-          t = t && pineda_edge(x, y, projectedVertices[p0VertexIdx], projectedVertices[p1VertexIdx]);
-          // mesh.get_vertex(mesh.get_vertex_order_idx(i)), mesh.get_vertex(mesh.get_vertex_order_idx(i + 1))
-        }
+        assert(verticesInFace == 3 && "face must be triangle");
 
-        if (t)
-        {
-          buffer[bufferIdx] = 0;
-          buffer[bufferIdx + 1] = 0.5;
-          buffer[bufferIdx + 2] = 0;
-        }
-        else
-        {
-          buffer[bufferIdx] = 0.2;
-          buffer[bufferIdx + 1] = 0.2;
-          buffer[bufferIdx + 2] = 0;
-        }
+        float area = pineda_edge(p0, p1, p2);
+        float w0 = pineda_edge(p, p1, p2);
+        float w1 = pineda_edge(p, p2, p0);
+        float w2 = pineda_edge(p, p0, p1);
 
-        vertexIdx += verticesInFace;
+        Point3h edge0 = p2 - p1;
+        Point3h edge1 = p0 - p2;
+        Point3h edge2 = p1 - p0;
+
+        bool overlaps = true;
+
+        overlaps &= (w0 == 0 ? ((edge0.y() == 0 && edge0.x() > 0) || edge0.y() > 0) : (w0 > 0));
+        overlaps &= (w1 == 0 ? ((edge1.y() == 0 && edge1.x() > 0) || edge1.y() > 0) : (w1 > 0));
+        overlaps &= (w2 == 0 ? ((edge2.y() == 0 && edge2.x() > 0) || edge2.y() > 0) : (w2 > 0));
+
+        if (overlaps)
+        {
+          w0 /= area;
+          w1 /= area;
+          w2 /= area;
+          buffer[bufferIdx] = w0;
+          buffer[bufferIdx + 1] = w1;
+          buffer[bufferIdx + 2] = w2;
+        }
       }
     }
   }
   return buffer;
 }
 
-bool Camera::pineda_edge(float x, float y, Point3h p0, Point3h p1)
+float Camera::pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1)
 {
-  return (((x - p0.x()) * (p1.y() - p0.y()) - (y - p0.y()) * (p1.x() - p0.x())) >= 0);
+  return (p.x() - p0.x()) * (p1.y() - p0.y()) - (p.y() - p0.y()) * (p1.x() - p0.x());
 }
 /*
   Apply the pineda edge test to see if the pixel lies inside the projection of the polygon
 */
-bool Camera::find_containing_faces(float x, float y, Mesh &mesh)
-{
-  bool t = true;
-  for (size_t i = 0; i < mesh.get_total_non_unique_vertices() - 1; i++)
-  {
-    t = t && pineda_edge(x, y, mesh.get_vertex(mesh.get_vertex_order_idx(i)), mesh.get_vertex(mesh.get_vertex_order_idx(i + 1)));
-  }
-  return t;
-}
+// bool Camera::find_containing_faces(float x, float y, Mesh &mesh)
+// {
+//   bool t = true;
+//   for (size_t i = 0; i < mesh.get_total_non_unique_vertices() - 1; i++)
+//   {
+//     t = t && pineda_edge(x, y, mesh.get_vertex(mesh.get_vertex_order_idx(i)), mesh.get_vertex(mesh.get_vertex_order_idx(i + 1)));
+//   }
+//   return t;
+// }
 
 void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &imgBuffer)
 {

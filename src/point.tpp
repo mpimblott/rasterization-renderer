@@ -158,6 +158,16 @@ inline Point3h &Point3h::operator=(const Point3h &v)
   return *this;
 }
 
+inline Point3h Point3h::operator+(const Point3h &v) const
+{
+  return Point3h(data[0] + v[0], data[1] + v[1], data[2] + v[2]);
+}
+
+inline Point3h Point3h::operator-(const Point3h &v) const
+{
+  return Point3h(data[0] - v[0], data[1] - v[1], data[2] - v[2]);
+}
+
 inline Point3h operator*(float lhs, const Point3h &rhs)
 {
   return Point3h(rhs[0]*lhs, rhs[1]*lhs, rhs[2]*lhs);
