@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cassert>
-#include <array>
 #include "vector.h"
-#include <vector>
+#include <array>
+#include <cassert>
 #include <cmath>
+#include <vector>
 
 class Point3;
 class Point3h;
@@ -17,8 +17,7 @@ Point3h operator*(const Point3h &lhs, const Matf4 &rhs);
 
 Point3h cross(const Point3h &lhs, const Point3h &rhs);
 
-class Point3 : public Vec<float, 3>
-{
+class Point3 : public Vec<float, 3> {
 public:
   // using Vec::Vec;
   Point3();
@@ -33,8 +32,7 @@ public:
   Point3 &operator=(const Vec<float, 3> &v);
 };
 
-class Point3h : public Vec<float, 4>
-{
+class Point3h : public Vec<float, 4> {
 public:
   Point3h();
   Point3h(std::initializer_list<float> v);

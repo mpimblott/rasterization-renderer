@@ -1,20 +1,20 @@
 #pragma once
 
-#include <memory>
 #include <cmath>
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <sstream>
+#include <string>
 
-#include "vector.h"
-#include "point.h"
 #include "geometry.h"
+#include "point.h"
+#include "vector.h"
 
-using std::unique_ptr;
+using std::make_shared;
 using std::make_unique;
 using std::shared_ptr;
-using std::make_shared;
+using std::unique_ptr;
 
 Matf4 RotateAboutX(float radians);
 Matf4 RotateAboutY(float radians);

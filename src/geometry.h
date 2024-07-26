@@ -1,15 +1,15 @@
 #pragma once
 
+#include "point.h"
+#include <array>
 #include <cassert>
 #include <memory>
 #include <vector>
-#include <array>
-#include "point.h"
 
+using std::array;
 using std::make_shared;
 using std::shared_ptr;
 using std::unique_ptr;
-using std::array;
 
 class Mesh;
 
@@ -17,18 +17,17 @@ using triangle = std::array<size_t, 3>;
 
 std::ostream &operator<<(std::ostream &os, const Mesh &mesh);
 
-class Mesh
-{
+class Mesh {
 public:
   Mesh() = default;
-  // Mesh(std::vector<Point3h> vertices, std::vector<size_t> indices, std::vector<Point3h> normals);
-  Mesh(
-      size_t totalNonUniqueVertices,
-      unique_ptr<std::vector<size_t>> vertexOrderingIndices,
-      unique_ptr<std::vector<Point3h>> vertices,
-      unique_ptr<std::vector<Point3h>> normals,
-      unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates,
-      unique_ptr<std::vector<Vec<float, 3>>> vertexColours);
+  // Mesh(std::vector<Point3h> vertices, std::vector<size_t> indices,
+  // std::vector<Point3h> normals);
+  Mesh(size_t totalNonUniqueVertices,
+       unique_ptr<std::vector<size_t>> vertexOrderingIndices,
+       unique_ptr<std::vector<Point3h>> vertices,
+       unique_ptr<std::vector<Point3h>> normals,
+       unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates,
+       unique_ptr<std::vector<Vec<float, 3>>> vertexColours);
 
   const size_t get_n_faces() const;
   const size_t &get_total_non_unique_vertices() const;
@@ -45,15 +44,15 @@ public:
 
 private:
   size_t totalNonUniqueVertices;
-  unique_ptr<std::vector<size_t>> vertexOrderingIndices; // stores the vertex ordering data
+  unique_ptr<std::vector<size_t>>
+      vertexOrderingIndices;                 // stores the vertex ordering data
   unique_ptr<std::vector<Point3h>> vertices; // the vertices
   unique_ptr<std::vector<Point3h>> normals;  // the normals to each face
   unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates;
   unique_ptr<std::vector<Vec<float, 3>>> vertexColours;
 };
 
-class MeshList
-{
+class MeshList {
 public:
   MeshList() = default;
   void add(shared_ptr<Mesh> mesh);
