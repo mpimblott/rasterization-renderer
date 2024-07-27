@@ -6,6 +6,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include "geometry.h"
 #include "point.h"

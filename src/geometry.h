@@ -13,41 +13,56 @@ using std::shared_ptr;
 using std::unique_ptr;
 
 class Mesh;
+struct Triangle;
+using Vertex = Point3h;
 
-using triangle = std::array<size_t, 3>;
-
+std::ostream &operator<<(std::ostream &os, const Triangle &triangle);
 std::ostream &operator<<(std::ostream &os, const Mesh &mesh);
+
+struct TextureCoord {
+  TextureCoord(float u, float v) : u(u), v(v){};
+  float u, v;
+};
+
+struct Triangle {
+  Triangle(const std::array<size_t, 3> &vertexIndices, const std::array<size_t, 3> &textureCoordIndices,
+           const std::array<size_t, 3> &normalIndices, const std::array<size_t, 3> &vertexColourIndices)
+      : vertexIndices(vertexIndices),
+        textureCoordIndices(textureCoordIndices),
+        normalIndices(normalIndices),
+        vertexColourIndices(vertexColourIndices){};
+  const std::array<size_t, 3> vertexIndices;
+  const std::array<size_t, 3> textureCoordIndices;
+  const std::array<size_t, 3> normalIndices;
+  const std::array<size_t, 3> vertexColourIndices;
+  const size_t nVertices = 3;
+  friend std::ostream &operator<<(std::ostream &os, const Triangle &triangle);
+};
 
 class Mesh {
  public:
   Mesh() = default;
-  // Mesh(std::vector<Point3h> vertices, std::vector<size_t> indices,
-  // std::vector<Point3h> normals);
-  Mesh(size_t nFaces, unique_ptr<std::vector<size_t>> vertexOrderingIndices, unique_ptr<std::vector<size_t>> verticesPerFace,
-       unique_ptr<std::vector<Point3h>> vertices, unique_ptr<std::vector<Point3h>> normals,
-       unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates, unique_ptr<std::vector<Vec<float, 3>>> vertexColours);
+  Mesh(size_t nFaces, unique_ptr<std::vector<Triangle>> triangles, unique_ptr<std::vector<Point3h>> vertices,
+       unique_ptr<std::vector<Point3h>> normals, unique_ptr<std::vector<TextureCoord>> textureCoordinates,
+       unique_ptr<std::vector<Vec<float, 3>>> vertexColours);
 
   const size_t get_n_faces() const;
-  const size_t get_total_non_unique_vertices() const;
-  const std::vector<size_t> &get_vertex_ordering_indices() const;
   const size_t get_n_vertices() const;
-  const std::vector<Point3h> &get_vertices() const;
-  const std::vector<Point3h> &get_normals() const;
-  const std::vector<Vec<float, 2>> &get_texture_coordinates() const;
-  const Point3h &get_vertex(size_t i) const;
-  const size_t &get_vertex_order_idx(size_t i) const;
-  const Vec<float, 3> &get_vertex_colour(size_t i) const;
-  const size_t &get_vertices_in_face(size_t i) const;
+  const std::vector<Point3h> &get_vertices() const { return *vertices; }
+  const Vertex &get_vertex(size_t i) const;
+  const Triangle &get_triangle(size_t i) const;
+  const ColourRGB &get_vertex_colour(size_t i) const;
   friend std::ostream &operator<<(std::ostream &os, const Mesh &mesh);
 
  private:
-  size_t nFaces;
-  unique_ptr<std::vector<size_t>> vertexOrderingIndices;  // stores the vertex ordering data
-  unique_ptr<std::vector<size_t>> verticesPerFace;
+  // core mesh data ----------
   unique_ptr<std::vector<Point3h>> vertices;  // the vertices
-  unique_ptr<std::vector<Point3h>> normals;   // the normals to each face
-  unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates;
-  unique_ptr<std::vector<Vec<float, 3>>> vertexColours;
+  unique_ptr<std::vector<TextureCoord>> textureCoordinates;
+  unique_ptr<std::vector<Point3h>> normals;               // the normals to each face
+  unique_ptr<std::vector<ColourRGB>> vertexColours;
+  // mesh organisation data --
+  size_t nFaces;
+  unique_ptr<std::vector<Triangle>> triangles;
 };
 
 class MeshList {

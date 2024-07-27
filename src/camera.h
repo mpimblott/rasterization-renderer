@@ -53,7 +53,7 @@ class Camera {
     Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
     Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
     Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
-    std::vector<Point3h> project_vertices(const Mesh &meshPtr);
+    std::vector<Point3h> project_vertices(const std::vector<Point3h> &vertices);
     float pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1);
     // returns [xmax, xmin, ymax, ymin] defining bbox in raster space
     std::tuple<size_t, size_t, size_t, size_t> triangle_raster_bbox(const Point3h &a, const Point3h &b,

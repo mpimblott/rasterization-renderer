@@ -85,8 +85,7 @@ Point3h &Camera::compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt
     return dst_pt;
 }
 
-std::vector<Point3h> Camera::project_vertices(const Mesh &mesh) {
-    const std::vector<Point3h> &vertices = mesh.get_vertices();
+std::vector<Point3h> Camera::project_vertices(const std::vector<Point3h> &vertices) {
     std::vector<Point3h> projected_vertices(vertices.size());
     for (size_t i = 0; i < vertices.size(); i++) {
         Point3h p;
@@ -97,25 +96,26 @@ std::vector<Point3h> Camera::project_vertices(const Mesh &mesh) {
 }
 
 std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
-    std::vector<Point3h> projectedVertices = project_vertices(mesh);
+    std::vector<Point3h> projectedVertices = project_vertices(mesh.get_vertices());
     for (auto &v : projectedVertices) {
         std::cerr << v << std::endl;
     }
+    // screen buffers
     std::vector<float> buffer(pixelWidth * pixelHeight * 3);
     std::vector<float> depthBuffer(pixelWidth * pixelHeight, std::numeric_limits<float>::max());
+
+
     const size_t nFaces = mesh.get_n_faces();
     std::cerr << "mesh has " << nFaces << " faces." << std::endl;
     for (size_t f = 0; f < nFaces; f++) {
         std::cerr << "processing face " << f << ", ";
-        std::cerr << "face has " << mesh.get_vertices_in_face(f) << " vertices: ";
+        std::cerr << "face has " << mesh.get_triangle(f).nVertices << " vertices: ";
         const size_t startVertIdx = f * 3;  // 3 vertices in a triangle
-        const size_t &p1Idx = mesh.get_vertex_order_idx(startVertIdx);
-        const size_t &p2Idx = mesh.get_vertex_order_idx(startVertIdx + 1);
-        const size_t &p3Idx = mesh.get_vertex_order_idx(startVertIdx + 2);
-        std::cerr << p1Idx << ", " << p2Idx << ", " << p3Idx << std::endl;
-        const Point3h &p0 = projectedVertices[p1Idx];
-        const Point3h &p1 = projectedVertices[p2Idx];
-        const Point3h &p2 = projectedVertices[p3Idx];
+        const Triangle &triangle = mesh.get_triangle(f);
+        std::cerr << triangle.vertexIndices[0] << ", " << triangle.vertexIndices[1] << ", " << triangle.vertexIndices[2] << std::endl;
+        const Point3h &p0 = projectedVertices[triangle.vertexIndices[0]];
+        const Point3h &p1 = projectedVertices[triangle.vertexIndices[1]];
+        const Point3h &p2 = projectedVertices[triangle.vertexIndices[2]];
         size_t xmax;
         size_t xmin;
         size_t ymax;
@@ -126,11 +126,10 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
             for (size_t x = 0; x < pixelWidth; x++) {
                 Point3h p = Point3h(x, y, 1000000);
                 size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
-                // for each face in the mesh
-                // vertex colours
-                Vec<float, 3> c0 = mesh.get_vertex_colour(p1Idx);
-                Vec<float, 3> c1 = mesh.get_vertex_colour(p2Idx);
-                Vec<float, 3> c2 = mesh.get_vertex_colour(p3Idx);
+                
+                ColourRGB c0 = mesh.get_vertex_colour(triangle.vertexColourIndices[0]);
+                ColourRGB c1 = mesh.get_vertex_colour(triangle.vertexColourIndices[1]);
+                ColourRGB c2 = mesh.get_vertex_colour(triangle.vertexColourIndices[2]);
 
                 // perspective-correct vertex attribute interpolation
                 c0[0] /= p0[2], c0[1] /= p0[2], c0[2] /= p0[2];

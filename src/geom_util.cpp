@@ -109,10 +109,9 @@ shared_ptr<Mesh> objLoader(const char *file) {
     size_t nFaces = 0;
     unique_ptr<std::vector<Point3h>> vertices = make_unique<std::vector<Point3h>>();
     unique_ptr<std::vector<Point3h>> normals = make_unique<std::vector<Point3h>>();
-    unique_ptr<std::vector<Vec<float, 2>>> textureCoordinates = make_unique<std::vector<Vec<float, 2>>>();
-    unique_ptr<std::vector<Vec<float, 3>>> vertexColours = make_unique<std::vector<ColourRGB>>();
-    unique_ptr<std::vector<size_t>> vertexOrderingIndices = make_unique<std::vector<size_t>>();
-    unique_ptr<std::vector<size_t>> verticesPerFace = make_unique<std::vector<size_t>>();
+    unique_ptr<std::vector<TextureCoord>> textureCoordinates = make_unique<std::vector<TextureCoord>>();
+    unique_ptr<std::vector<ColourRGB>> vertexColours = make_unique<std::vector<ColourRGB>>();
+    unique_ptr<std::vector<Triangle>> triangles = make_unique<std::vector<Triangle>>();
 
     while (std::getline(ss, line)) {
       std::stringstream lineStream(line);
@@ -122,33 +121,50 @@ shared_ptr<Mesh> objLoader(const char *file) {
       if (type == "#") {
         continue;
       } else if (type == "v") {
+        // vertex positioning data -  these are repeated positions that may be shared among several faces of a mesh
         Point3h vertex;
         lineStream >> vertex.x() >> vertex.y() >> vertex.z();
         std::cerr << "v: " << vertex << std::endl;
-        (*vertices).push_back(vertex);
+        vertices->push_back(vertex);
       } else if (type == "f") {
-        nFaces++;
-        std::string vertexIndex;
-        size_t nVertices = 0;
 
-        while (lineStream >> vertexIndex) {
-          std::stringstream vertexIndexStream(vertexIndex);
+        // face data
+        nFaces++;
+        std::string chunk;
+        std::string vertexIndex;
+        std::string colourIndex;
+        size_t vertexCount = 0;
+
+        std::array<size_t, 3> vertexIndices;
+        std::array<size_t, 3> colourIndices;
+        std::array<size_t, 3> normalIndices;
+        std::array<size_t, 3> textureCoordIndices;
+
+        while (lineStream >> chunk) {
+          std::replace(chunk.begin(), chunk.end(), '/', ' ');
+          std::stringstream vertexIndexStream(chunk);
           size_t vertexIndex;
-          vertexIndexStream >> vertexIndex;
-          (*vertexOrderingIndices).push_back(vertexIndex - 1);
-          nVertices++;
+          size_t colourIndex;
+          vertexIndexStream >> vertexIndex >> colourIndex;
+          vertexIndex--;
+          colourIndex--;
+          vertexIndices[vertexCount] = vertexIndex;
+          colourIndices[vertexCount] = colourIndex;
+          vertexCount++;
         }
-        std::cerr << "f(" << nVertices << " vertices)" << std::endl;
-        (*verticesPerFace).push_back(nVertices);
+        std::cerr << "building triangle" << std::endl;
+        Triangle tri(vertexIndices, textureCoordIndices, normalIndices, colourIndices);
+        triangles->push_back(tri);
+        std::cerr << "f: " << tri << std::endl;
       } else if (type == "vc") {
         ColourRGB col;
         lineStream >> col[0] >> col[1] >> col[2];
-        (*vertexColours).push_back(col);
+        vertexColours->push_back(col);
       }
     }
 
     shared_ptr<Mesh> mesh_out =
-        make_shared<Mesh>(Mesh(nFaces, std::move(vertexOrderingIndices), std::move(verticesPerFace), std::move(vertices),
+        make_shared<Mesh>(Mesh(nFaces, std::move(triangles), std::move(vertices),
                                std::move(normals), std::move(textureCoordinates), std::move(vertexColours)));
     return mesh_out;
   } catch (...) {

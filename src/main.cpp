@@ -23,7 +23,7 @@ int main() {
     // cam.build_img_buffer(triangle);
     ppmRenderer renderer;
     // shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle_single.mesh");
-    shared_ptr<Mesh> mesh = objLoader("/home/matt/projects/rasterization-renderer/meshes/tetrahedron.obj");
+    shared_ptr<Mesh> mesh = objLoader("/home/matt/projects/rasterization-renderer/meshes/cube.obj");
     std::cerr << (*mesh) << std::endl;
     std::vector<float> img_buffer = cam.build_img_buffer(*mesh);
     renderer.render(500, 500, img_buffer);
