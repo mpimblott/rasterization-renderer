@@ -7,6 +7,9 @@
 
 #include "vector.h"
 
+using ColourRGBA = Vec<float, 4>;
+using ColourRGB = Vec<float, 3>;
+
 class Point3;
 class Point3h;
 

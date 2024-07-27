@@ -16,13 +16,14 @@ using std::shared_ptr;
 // Point3h c = {-0.5, 0.5, -0.5};
 int main() {
     // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
-    Camera cam(500, 500, 90, 40, 120);
+    Camera cam(500, 500, 90, 0.1, 5);
     // Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1,
     // 2, 0}); std::cout << triangle << std::endl;
 
     // cam.build_img_buffer(triangle);
     ppmRenderer renderer;
-    shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle_single.mesh");
+    // shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle_single.mesh");
+    shared_ptr<Mesh> mesh = objLoader("/home/matt/projects/rasterization-renderer/meshes/tetrahedron.obj");
     std::cerr << (*mesh) << std::endl;
     std::vector<float> img_buffer = cam.build_img_buffer(*mesh);
     renderer.render(500, 500, img_buffer);

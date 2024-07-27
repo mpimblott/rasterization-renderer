@@ -103,11 +103,16 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
     }
     std::vector<float> buffer(pixelWidth * pixelHeight * 3);
     std::vector<float> depthBuffer(pixelWidth * pixelHeight, std::numeric_limits<float>::max());
-    for (size_t f = 0; f < mesh.get_n_faces(); f++) {
+    const size_t nFaces = mesh.get_n_faces();
+    std::cerr << "mesh has " << nFaces << " faces." << std::endl;
+    for (size_t f = 0; f < nFaces; f++) {
+        std::cerr << "processing face " << f << ", ";
+        std::cerr << "face has " << mesh.get_vertices_in_face(f) << " vertices: ";
         const size_t startVertIdx = f * 3;  // 3 vertices in a triangle
         const size_t &p1Idx = mesh.get_vertex_order_idx(startVertIdx);
         const size_t &p2Idx = mesh.get_vertex_order_idx(startVertIdx + 1);
         const size_t &p3Idx = mesh.get_vertex_order_idx(startVertIdx + 2);
+        std::cerr << p1Idx << ", " << p2Idx << ", " << p3Idx << std::endl;
         const Point3h &p0 = projectedVertices[p1Idx];
         const Point3h &p1 = projectedVertices[p2Idx];
         const Point3h &p2 = projectedVertices[p3Idx];
@@ -117,8 +122,8 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
         size_t ymin;
         std::tie(xmax, xmin, ymax, ymin) = triangle_raster_bbox(p0, p1, p2, pixelWidth, pixelHeight);
 
-        for (size_t y = ymin; y < ymax; y++) {
-            for (size_t x = xmin; x < xmax; x++) {
+        for (size_t y = 0; y < pixelHeight; y++) {
+            for (size_t x = 0; x < pixelWidth; x++) {
                 Point3h p = Point3h(x, y, 1000000);
                 size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
                 // for each face in the mesh
@@ -195,7 +200,7 @@ inline std::tuple<size_t, size_t, size_t, size_t> Camera::triangle_raster_bbox(c
 
 void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix,
                            Point3h &out) {
-    std::cerr << "shader" << std::endl;
+    // std::cerr << "shader" << std::endl;
     out = vertex * worldToCameraMatrix;
     out = out * projectionMatrix;
     if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1) return;

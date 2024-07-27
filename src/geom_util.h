@@ -21,3 +21,5 @@ Matf4 RotateAboutY(float radians);
 Matf4 RotateAboutZ(float radians);
 
 shared_ptr<Mesh> loadGeoFile(const char *file);
+
+shared_ptr<Mesh> objLoader(const char *file);

@@ -6,6 +6,7 @@
 #include <limits>
 #include <memory>
 #include <tuple>
+#include <functional>
 
 #include "geometry.h"
 #include "math.h"
@@ -16,7 +17,8 @@
 using std::make_shared;
 using std::shared_ptr;
 using colour = float;
-using ColourRGBA = Vec<float, 4>;
+
+// using TextureShader =  
 
 class Camera {
    public:

@@ -2,3 +2,5 @@ build
 .vscode
 temp.**
 *.ppm
+meshes
+*.obj
