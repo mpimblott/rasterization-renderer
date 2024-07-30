@@ -1,0 +1,21 @@
+v -1 -1 -1
+v 1 -1 -1
+v 1 1 -1
+v -1 1 -1
+v -1 -1 1
+v 1 -1 1
+v 1 1 1
+v -1 1 1
+
+# front face
+f 1 4 3 2
+# bottom face
+f 1 2 6 5
+# +x face
+f 2 3 7 6
+# top face
+f 3 4 8 7
+# -x face
+f 4 1 5 8
+# back face
+f 6 7 5 5
