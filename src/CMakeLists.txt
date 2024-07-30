@@ -12,6 +12,7 @@ add_executable(
   geometry.cpp
   ppm.cpp
   geom_util.cpp
+  obj.cpp
   )
   
 target_compile_features(Renderer PRIVATE cxx_std_14)

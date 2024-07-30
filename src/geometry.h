@@ -42,7 +42,7 @@ struct Triangle {
 class Mesh {
  public:
   Mesh() = default;
-  Mesh(size_t nFaces, unique_ptr<std::vector<Triangle>> triangles, unique_ptr<std::vector<Point3h>> vertices,
+  Mesh(unique_ptr<std::vector<Triangle>> triangles, unique_ptr<std::vector<Point3h>> vertices,
        unique_ptr<std::vector<Point3h>> normals, unique_ptr<std::vector<TextureCoord>> textureCoordinates,
        unique_ptr<std::vector<Vec<float, 3>>> vertexColours);
 
@@ -61,7 +61,6 @@ class Mesh {
   unique_ptr<std::vector<Point3h>> normals;               // the normals to each face
   unique_ptr<std::vector<ColourRGB>> vertexColours;
   // mesh organisation data --
-  size_t nFaces;
   unique_ptr<std::vector<Triangle>> triangles;
 };
 
