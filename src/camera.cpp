@@ -104,8 +104,8 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
         size_t ymin;
         std::tie(xmax, xmin, ymax, ymin) = triangle_raster_bbox(p0, p1, p2, pixelWidth, pixelHeight);
 
-        for (size_t y = 0; y < pixelHeight; y++) {
-            for (size_t x = 0; x < pixelWidth; x++) {
+        for (size_t y = ymin; y < ymax; y++) {
+            for (size_t x = xmin; x < xmax; x++) {
                 Point3h p = Point3h(x, y, 1000000);
                 size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
 
@@ -174,10 +174,10 @@ inline std::tuple<size_t, size_t, size_t, size_t> Camera::triangle_raster_bbox(c
     size_t xmin = std::min({a.x(), b.x(), c.x()}) - 1;
     size_t ymax = std::max({a.y(), b.y(), c.y()}) - 1;
     size_t ymin = std::min({a.y(), b.y(), c.y()}) - 1;
-    xmax = std::min(xmax, xMaximumLimit);
-    xmin = std::max(xmin, (size_t)0);
-    ymax = std::min(ymax, yMaximumLimit);
-    ymin = std::max(ymin, (size_t)0);
+    xmax = std::min(xmax + 3, xMaximumLimit);
+    xmin = std::max(xmin - 3, (size_t)0);
+    ymax = std::min(ymax + 3, yMaximumLimit);
+    ymin = std::max(ymin - 3, (size_t)0);
     return {xmax, xmin, ymax, ymin};
 }
 
