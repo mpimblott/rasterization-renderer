@@ -181,11 +181,13 @@ void ObjLoader::parse_face(std::stringstream &ss, unique_ptr<std::vector<Triangl
       size_t nVertexPropertiesProvided = find_n_stringstream_chunks(chunkStream);
       if (nVertexPropertiesProvided == 1) {
         // only vertex information is provided, no colour, texture or normal information given
-        // size_t vertexId;
-        // chunkStream >> vertexId;
-        // vertexId--;
-        // vertexIndices[currentIdx] = vertexId;
-        assert(false && "1 face property not tested");
+        size_t vertexId;
+        chunkStream >> vertexId;
+        vertexId--;
+        vertexIndices[currentIdx] = vertexId;
+        colourIndices[currentIdx] = coloursRequired;
+        faceRequiresColour = true;
+        // assert(false && "1 face property not tested");
       } else if (nVertexPropertiesProvided == 2) {
         size_t vertexId;
         size_t colourId;
@@ -210,6 +212,10 @@ void ObjLoader::parse_face(std::stringstream &ss, unique_ptr<std::vector<Triangl
         assert(false && "unsupported number of vertex parameters provided in face definition");
       }
       currentIdx++;
+    }
+    if (faceRequiresColour)
+    {
+      coloursRequired++;
     }
     std::cerr << "building triangle" << std::endl;
     Triangle tri(vertexIndices, textureCoordIndices, normalIndices, colourIndices);
