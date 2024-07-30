@@ -146,7 +146,6 @@ class Vec {
 };
 
 typedef Vec<float, 2> Vecf2;
-typedef Vec<float, 3> Vecf3;
 typedef Vec<Vec<float, 2>, 2> Matf2;
 typedef Vec<Vec<float, 3>, 3> Matf3;
 typedef Vec<Vec<float, 4>, 4> Matf4;

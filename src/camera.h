@@ -36,10 +36,11 @@ class Camera {
                        Point3h &out);
     void texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
                         const Vec<float, 3> &c0, const Vec<float, 3> &c1, const Vec<float, 3> &c2, const float &z);
+    void set_look_at(const Point3h &position, const Vec3h &arbUp, const Point3h &focus);
 
    private:
     void init();
-    Matf4 camMat;
+    Matf4 worldToCamera;
     Matf4 projectionMat;
     void recompute_projection_mat();
     float viewportWidth;
@@ -50,15 +51,15 @@ class Camera {
     float farClippingDistance = 6;
     float fov = 90;
     Point3h defaultPos = Point3h(0, 0, 0);
-    Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
-    Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
-    Point3h &compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const;
     std::vector<Point3h> project_vertices(const std::vector<Point3h> &vertices);
     float pineda_edge(const Point3h &p, const Point3h &p0, const Point3h &p1);
     // returns [xmax, xmin, ymax, ymin] defining bbox in raster space
     std::tuple<size_t, size_t, size_t, size_t> triangle_raster_bbox(const Point3h &a, const Point3h &b,
                                                                     const Point3h &c, size_t xMaximumLimit,
                                                                     size_t yMaximumLimit);
+
+    Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
+    Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
 };
 
 class Renderer {

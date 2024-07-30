@@ -10,14 +10,14 @@ Camera::Camera(size_t width, size_t height, float fov, float nearClipping, float
 }
 
 void Camera::init() {
-    Id(camMat);
-    camMat[2][2] = -1;
+    Id(worldToCamera);
+    worldToCamera[2][2] = 1;
     recompute_projection_mat();
 }
 
-const Matf4 &Camera::world_to_cam_mat() const { return camMat; }
+const Matf4 &Camera::world_to_cam_mat() const { return worldToCamera; }
 
-const Matf4 Camera::cam_to_world_mat() const { return inv(camMat); }
+const Matf4 Camera::cam_to_world_mat() const { return inv(worldToCamera); }
 
 const Matf4 &Camera::projection_mat() const { return projectionMat; }
 
@@ -40,7 +40,7 @@ void Camera::recompute_projection_mat() {
     // this matrix maps from screen space to NDC space ([-1,1]) accounting for
     // clipping and fov should be pre-multiplication by worldToCam and after
     // should be normalised to [0, 1] for raster space
-    float s = (static_cast<float>(1 / tan((fov * 0.5 * pi / 180))));
+    float s = (static_cast<float>(1 / tan((fov * 0.5 * pi) / 180)));
     projectionMat = {
         {s, 0, 0, 0},
         {0, s, 0, 0},
@@ -50,40 +50,22 @@ void Camera::recompute_projection_mat() {
 
 void Camera::set_pos(Point3 &p) {
     // build the translation matrix from the default position to the desired point
-    camMat[3][0] = p[0] - defaultPos[0];
-    camMat[3][1] = p[1] - defaultPos[1];
-    camMat[3][2] = p[2] - defaultPos[2];
+    worldToCamera[3][0] = p[0] - defaultPos[0];
+    worldToCamera[3][1] = p[1] - defaultPos[1];
+    worldToCamera[3][2] = p[2] - defaultPos[2];
 }
 
-Point3 Camera::get_pos() const { return Point3(camMat[3][0], camMat[3][1], camMat[3][2]); }
+Point3 Camera::get_pos() const { return Point3(worldToCamera[3][0], worldToCamera[3][1], worldToCamera[3][2]); }
 
-Point3h &Camera::cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const {
-    dst_pt.x() = src_pt.x() / (-1 * src_pt.z());
-    dst_pt.y() = src_pt.y() / (-1 * src_pt.z());
-    dst_pt.z() = -1 * src_pt.z();
-    return dst_pt;
-}
-
-/*
-  normalise the x and y coordinates in screen space to raster space
-  (width and height limited by fov and rounded)
-*/
-Point3h &Camera::screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const {
-    float normalised_x = (src_pt.x() + (viewportWidth / 2)) / viewportWidth;
-    float normalised_y = (src_pt.y() + (viewportHeight / 2)) / viewportHeight;
-    dst_pt.x() = std::floor(normalised_x * pixelWidth);
-    dst_pt.y() = std::floor((1 - normalised_y) * pixelHeight);
-    return dst_pt;
-}
-
-/*
- * compute the raster coordinate of a world coordinate
- */
-Point3h &Camera::compute_pixel_coordinate(const Point3h &src_pt, Point3h &dst_pt) const {
-    cam_to_screen(src_pt, dst_pt);
-    screen_to_raster(dst_pt, dst_pt);
-    return dst_pt;
-}
+// std::vector<Point3h> Camera::project_vertices(const std::vector<Point3h> &vertices) {
+//     std::vector<Point3h> projected_vertices(vertices.size());
+//     for (size_t i = 0; i < vertices.size(); i++) {
+//         Point3h p;
+//         vertex_shader(vertices[i], projection_mat(), world_to_cam_mat(), p);
+//         projected_vertices[i] = p;
+//     }
+//     return projected_vertices;
+// }
 
 std::vector<Point3h> Camera::project_vertices(const std::vector<Point3h> &vertices) {
     std::vector<Point3h> projected_vertices(vertices.size());
@@ -126,7 +108,7 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
             for (size_t x = 0; x < pixelWidth; x++) {
                 Point3h p = Point3h(x, y, 1000000);
                 size_t bufferIdx = y * pixelWidth * 3 + 3 * x;
-                
+
                 ColourRGB c0 = mesh.get_vertex_colour(triangle.vertexColourIndices[0]);
                 ColourRGB c1 = mesh.get_vertex_colour(triangle.vertexColourIndices[1]);
                 ColourRGB c2 = mesh.get_vertex_colour(triangle.vertexColourIndices[2]);
@@ -200,12 +182,16 @@ inline std::tuple<size_t, size_t, size_t, size_t> Camera::triangle_raster_bbox(c
 void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix,
                            Point3h &out) {
     // std::cerr << "shader" << std::endl;
+    std::cerr << "Point: " << vertex;
     out = vertex * worldToCameraMatrix;
+    std::cerr << ", cam space: " << out;
     out = out * projectionMatrix;
-    if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1) return;
+    std::cerr << ", NDC space: " << out;
+    // if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1) return;
     // convert to raster space
-    out.x() = std::min((uint32_t)(pixelWidth - 1), (uint32_t)((out.x() + 1) * 0.5 * pixelWidth));
-    out.y() = std::min((uint32_t)(pixelHeight - 1), (uint32_t)((1 - (out.y() + 1) * 0.5) * pixelHeight));
+    out.x() = (uint32_t)((out.x() + 1) * 0.5 * pixelWidth);
+    out.y() = (uint32_t)((1 - (out.y() + 1) * 0.5) * pixelHeight);
+    std::cerr << ", raster space: " << out << std::endl;
 }
 
 void Camera::texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
@@ -215,6 +201,22 @@ void Camera::texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, 
     float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
     r *= z, g *= z, b *= z;
     out[0] = r, out[1] = g, out[2] = b;
+}
+
+void Camera::set_look_at(const Point3h &from, const Vec3h &arbUp, const Point3h &to)
+{
+  Vec3h forward = (from-to).normalise();
+  Vec3h right = cross(arbUp, forward).normalise();
+  Vec3h up = cross(forward, right).normalise();
+  const Matf4 camMove = {
+    {right[0], right[1], right[2], 0},
+    {up[0], up[1], up[2], 0},
+    {forward[0], forward[1], forward[2], 0},
+    {from[0], from[1], from[2], 1}};
+  // const Matf4 invertZ = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, -1, 0}, {0, 0, 0, 1}};
+  Matf4 cameraToWorld = camMove;
+  worldToCamera = inv(cameraToWorld);
+  std::cerr << "worldToCamera: \n" << worldToCamera << std::endl;
 }
 
 void ppmRenderer::render(size_t width, size_t height, const std::vector<float> &imgBuffer) {

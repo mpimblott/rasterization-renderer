@@ -16,7 +16,7 @@ using std::shared_ptr;
 // Point3h c = {-0.5, 0.5, -0.5};
 int main() {
     // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
-    Camera cam(500, 500, 90, 0.1, 5);
+    Camera cam(500, 500, 90, 1, 100);
     // Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1,
     // 2, 0}); std::cout << triangle << std::endl;
 
@@ -25,6 +25,7 @@ int main() {
     // shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle_single.mesh");
     shared_ptr<Mesh> mesh = objLoader("/home/matt/projects/rasterization-renderer/meshes/cube.obj");
     std::cerr << (*mesh) << std::endl;
+    cam.set_look_at(Point3h(3, 2, 3), Vec3h(0, 1, 0), Point3h(0, 0, 0));
     std::vector<float> img_buffer = cam.build_img_buffer(*mesh);
     renderer.render(500, 500, img_buffer);
 }

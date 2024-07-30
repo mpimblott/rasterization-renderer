@@ -42,6 +42,7 @@ class Point3h : public Vec<float, 4> {
     Point3h(std::initializer_list<float> v);
     Point3h(Vec<float, 4> &v);
     Point3h(float x, float y, float z);
+    Point3h(float x, float y, float z, float w);
     float &x();
     float &y();
     float &z();
@@ -50,7 +51,7 @@ class Point3h : public Vec<float, 4> {
     const float &z() const;
     float norm() const;
     Point3h &normalise();
-    Point3h unit() const;
+    Point3h normalise() const;
     Point3h &operator=(const Point3h &v);
     Point3h operator+(const Point3h &v) const;
     Point3h operator-(const Point3h &v) const;
