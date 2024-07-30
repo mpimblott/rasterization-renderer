@@ -9,23 +9,16 @@
 
 using std::shared_ptr;
 
-// Matf4 ltw = { {0.718762, 0.615033, -0.324324, 0},
-//               {-0.393732, 0.744416, 0.539277, 0},
-//               {0.573042, -0.259959, 0.777216, 0},
-//               {0.526967, 1.254234, -2.532150, 1} };
-// Point3h c = {-0.5, 0.5, -0.5};
-int main() {
-    // Matf4 camMove = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 2, 1}};
-    Camera cam(500, 500, 90, 1, 100);
-    // Mesh triangle({{-0.5, 0.5, -2}, {-0.5, -0.5, -2}, {0.5, -0.5, -2}}, {0, 1,
-    // 2, 0}); std::cout << triangle << std::endl;
+#define WIDTH 700
+#define HEIGHT 700
 
-    // cam.build_img_buffer(triangle);
+int main() {
+    Camera cam(WIDTH, HEIGHT, 90, 1, 100);
+
     ppmRenderer renderer;
-    // shared_ptr<Mesh> mesh = loadGeoFile("/home/matt/projects/rasterization-renderer/triangle_single.mesh");
     shared_ptr<Mesh> mesh = objLoader("/home/matt/projects/rasterization-renderer/meshes/cube.obj");
     std::cerr << (*mesh) << std::endl;
     cam.set_look_at(Point3h(3, 2, 3), Vec3h(0, 1, 0), Point3h(0, 0, 0));
     std::vector<float> img_buffer = cam.build_img_buffer(*mesh);
-    renderer.render(500, 500, img_buffer);
+    renderer.render(WIDTH, HEIGHT, img_buffer);
 }

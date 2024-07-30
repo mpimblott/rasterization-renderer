@@ -120,15 +120,17 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
 
                 // vertex z-coordinate inversion
                 // p0[2] = 1 / p0[2], p1[2] = 1 / p1[2], p2[2] = 1 / p2[2];
-                float p0y_inverted = 1 / p0[2];
-                float p1y_inverted = 1 / p1[2];
-                float p2y_inverted = 1 / p2[2];
+                float p0z_inverted = 1 / p0[2];
+                float p1z_inverted = 1 / p1[2];
+                float p2z_inverted = 1 / p2[2];
 
+                // compute the pineda edge function of various proper and improper sub-triangles
                 float area = pineda_edge(p0, p1, p2);
                 float w0 = pineda_edge(p, p1, p2);
                 float w1 = pineda_edge(p, p2, p0);
                 float w2 = pineda_edge(p, p0, p1);
 
+                // find the edges of the triangle
                 Point3h edge0 = p2 - p1;
                 Point3h edge1 = p0 - p2;
                 Point3h edge2 = p1 - p0;
@@ -144,7 +146,7 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
                     w1 /= area;
                     w2 /= area;
 
-                    float z = 1 / (w0 * p0y_inverted + w1 * p1y_inverted + w2 * p2y_inverted);
+                    float z = 1 / (w0 * p0z_inverted + w1 * p1z_inverted + w2 * p2z_inverted);
                     if (z < depthBuffer[bufferIdx / 3]) {
                         depthBuffer[bufferIdx / 3] = z;
                         ColourRGBA rasterColour;
