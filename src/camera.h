@@ -36,7 +36,7 @@ class Camera {
                        Point3h &out);
     void texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
                         const Vec<float, 3> &c0, const Vec<float, 3> &c1, const Vec<float, 3> &c2, const float &z);
-    void set_look_at(const Point3h &position, const Vec3h &arbUp, const Point3h &focus);
+    void set_look_at(const Point3h &position, const Point3h &focus, const Vec3h &arbUp);
 
    private:
     void init();
@@ -57,9 +57,6 @@ class Camera {
     std::tuple<size_t, size_t, size_t, size_t> triangle_raster_bbox(const Point3h &a, const Point3h &b,
                                                                     const Point3h &c, size_t xMaximumLimit,
                                                                     size_t yMaximumLimit);
-
-    Point3h &cam_to_screen(const Point3h &src_pt, Point3h &dst_pt) const;
-    Point3h &screen_to_raster(const Point3h &src_pt, Point3h &dst_pt) const;
 };
 
 class Renderer {

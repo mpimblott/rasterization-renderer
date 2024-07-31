@@ -205,7 +205,7 @@ void Camera::texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, 
     out[0] = r, out[1] = g, out[2] = b;
 }
 
-void Camera::set_look_at(const Point3h &from, const Vec3h &arbUp, const Point3h &to)
+void Camera::set_look_at(const Point3h &from, const Point3h &to, const Vec3h &arbUp)
 {
   Vec3h forward = (from-to).normalise();
   Vec3h right = cross(arbUp, forward).normalise();
