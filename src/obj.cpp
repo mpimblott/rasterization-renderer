@@ -46,7 +46,7 @@ shared_ptr<Mesh> ObjLoader::load(const char *file) {
         Point3h vertex = parse_vertex(lineStream);
         vertices->push_back(vertex);
       } else if (type == "f") {
-        parse_face(lineStream, triangles);
+        parse_face(lineStream, *triangles);
       } else if (type == "vc") {
         ColourRGB col;
         lineStream >> col[0] >> col[1] >> col[2];
@@ -60,6 +60,10 @@ shared_ptr<Mesh> ObjLoader::load(const char *file) {
         vertexColours->push_back(random_colour());
       }
       coloursRequired = 0;
+    }
+
+    if (computeSmoothNormals) {
+      compute_smooth_normals(*triangles, *vertices);
     }
 
     shared_ptr<Mesh> mesh_out = make_shared<Mesh>(Mesh(std::move(triangles), std::move(vertices), std::move(normals),
@@ -91,135 +95,15 @@ size_t ObjLoader::find_n_stringstream_chunks(std::stringstream &ss, char delimit
   return count;
 }
 
-void ObjLoader::parse_face(std::stringstream &ss, unique_ptr<std::vector<Triangle>> &triangles) {
-  std::string chunk;
-  bool faceRequiresColour = false;
+void ObjLoader::parse_face(std::stringstream &ss, std::vector<Triangle> &triangles) {
   size_t vertexCount = find_n_stringstream_chunks(ss);
 
   if (vertexCount == 4) {
-    std::array<size_t, 4> vertexIndices;
-    std::array<size_t, 4> colourIndices;
-    std::array<size_t, 4> normalIndices;
-    std::array<size_t, 4> textureCoordIndices;
-
-    size_t currentIdx = 0;
-    while (ss >> chunk) {
-      std::replace(chunk.begin(), chunk.end(), '/', ' ');
-      std::stringstream chunkStream(chunk);
-      size_t nVertexPropertiesProvided = find_n_stringstream_chunks(chunkStream);
-      if (nVertexPropertiesProvided == 1) {
-        // only vertex information is provided, no colour, texture or normal information given
-        // assert(false && "1 face property not tested");
-        size_t vertexId;
-        chunkStream >> vertexId;
-        vertexId--;
-        vertexIndices[currentIdx] = vertexId;
-        colourIndices[currentIdx] = coloursRequired;
-        faceRequiresColour = true;
-      } else if (nVertexPropertiesProvided == 2) {
-        size_t vertexId;
-        size_t colourId;
-        chunkStream >> vertexId >> colourId;
-        vertexId--;
-        colourId--;
-        vertexIndices[currentIdx] = vertexId;
-        colourIndices[currentIdx] = colourId;
-      } else if (nVertexPropertiesProvided == 3) {
-        assert(false && "3 face properties not tested");
-        // size_t vertexId;
-        // size_t textureId;
-        // size_t normalId;
-        // chunkStream >> vertexId >> textureId >> normalId;
-        // vertexId--;
-        // textureId--;
-        // normalId--;
-        // vertexIndices[currentIdx] = vertexId;
-        // textureCoordIndices[currentIdx] = textureId;
-        // normalIndices[currentIdx] = normalId;
-      } else {
-        assert(false && "unsupported number of vertex parameters provided in face definition");
-      }
-      currentIdx++;
-    }
-    if (faceRequiresColour)
-    {
-      coloursRequired++;
-    }
-    std::cerr << "building triangle" << std::endl;
-    std::array<size_t, 3> vertexIndicesA({vertexIndices[0], vertexIndices[1], vertexIndices[2]});
-    std::array<size_t, 3> colourIndicesA({colourIndices[0], colourIndices[1], colourIndices[2]});
-    std::array<size_t, 3> normalIndicesA({normalIndices[0], normalIndices[1], normalIndices[2]});
-    std::array<size_t, 3> textureCoordIndicesA(
-        {textureCoordIndices[0], textureCoordIndices[1], textureCoordIndices[2]});
-    std::array<size_t, 3> vertexIndicesB({vertexIndices[0], vertexIndices[2], vertexIndices[3]});
-    std::array<size_t, 3> colourIndicesB({colourIndices[0], colourIndices[2], colourIndices[3]});
-    std::array<size_t, 3> normalIndicesB({normalIndices[0], normalIndices[2], normalIndices[3]});
-    std::array<size_t, 3> textureCoordIndicesB(
-        {textureCoordIndices[0], textureCoordIndices[2], textureCoordIndices[3]});
-    Triangle triA(vertexIndicesA, textureCoordIndicesA, normalIndicesA, colourIndicesA);
-    Triangle triB(vertexIndicesB, textureCoordIndicesB, normalIndicesB, colourIndicesB);
-    triangles->push_back(triA);
-    triangles->push_back(triB);
+    parse_polygon_face(ss, triangles, 4);
   }
 
   if (vertexCount == 3) {
-    std::array<size_t, 3> vertexIndices;
-    std::array<size_t, 3> colourIndices;
-    std::array<size_t, 3> normalIndices;
-    std::array<size_t, 3> textureCoordIndices;
-
-    /*
-     * process each block, which has the form: x/x/x
-     * default obj spec is vertex/vertexTexture/vertexNormal with '/' remaining when value
-     * is not provided
-     * in the case no '/' is left, we will use this for auto-generating random colours
-     */
-    size_t currentIdx = 0;
-    while (ss >> chunk) {
-      std::replace(chunk.begin(), chunk.end(), '/', ' ');
-      std::stringstream chunkStream(chunk);
-      size_t nVertexPropertiesProvided = find_n_stringstream_chunks(chunkStream);
-      if (nVertexPropertiesProvided == 1) {
-        // only vertex information is provided, no colour, texture or normal information given
-        size_t vertexId;
-        chunkStream >> vertexId;
-        vertexId--;
-        vertexIndices[currentIdx] = vertexId;
-        colourIndices[currentIdx] = coloursRequired;
-        faceRequiresColour = true;
-        // assert(false && "1 face property not tested");
-      } else if (nVertexPropertiesProvided == 2) {
-        size_t vertexId;
-        size_t colourId;
-        chunkStream >> vertexId >> colourId;
-        vertexId--;
-        colourId--;
-        vertexIndices[currentIdx] = vertexId;
-        colourIndices[currentIdx] = colourId;
-      } else if (nVertexPropertiesProvided == 3) {
-        assert(false && "3 face properties not tested");
-        // size_t vertexId;
-        // size_t textureId;
-        // size_t normalId;
-        // chunkStream >> vertexId >> textureId >> normalId;
-        // vertexId--;
-        // textureId--;
-        // normalId--;
-        // vertexIndices[currentIdx] = vertexId;
-        // textureCoordIndices[currentIdx] = textureId;
-        // normalIndices[currentIdx] = normalId;
-      } else {
-        assert(false && "unsupported number of vertex parameters provided in face definition");
-      }
-      currentIdx++;
-    }
-    if (faceRequiresColour)
-    {
-      coloursRequired++;
-    }
-    std::cerr << "building triangle" << std::endl;
-    Triangle tri(vertexIndices, textureCoordIndices, normalIndices, colourIndices);
-    triangles->push_back(tri);
+    parse_triangle_face(ss, triangles);
   }
 }
 
@@ -230,6 +114,107 @@ Point3h ObjLoader::parse_vertex(std::stringstream &ss) {
   return vertex;
 }
 
-ColourRGB ObjLoader::random_colour() {
-  return ColourRGB({(float)dis(gen), (float)dis(gen), (float)dis(gen)});
+ColourRGB ObjLoader::random_colour() { return ColourRGB({(float)dis(gen), (float)dis(gen), (float)dis(gen)}); }
+
+void ObjLoader::compute_smooth_normals(std::vector<Triangle> &triangles, const std::vector<Vertex> &vertices) {}
+
+void ObjLoader::parse_triangle_face(std::stringstream &ss, std::vector<Triangle> &triangles) {
+  bool faceRequiresColour = false;
+  std::string chunk;
+  std::array<size_t, 3> vertexIndices;
+  std::array<size_t, 3> colourIndices;
+  std::array<size_t, 3> normalIndices;
+  std::array<size_t, 3> textureCoordIndices;
+
+  size_t currentIdx = 0;
+  while (ss >> chunk) {
+    std::replace(chunk.begin(), chunk.end(), '/', ' ');
+    std::stringstream chunkStream(chunk);
+    size_t nVertexPropertiesProvided = find_n_stringstream_chunks(chunkStream);
+    if (nVertexPropertiesProvided == 1) {
+      // only vertex information is provided, no colour, texture or normal information given
+      size_t vertexId;
+      chunkStream >> vertexId;
+      vertexId--;
+      vertexIndices[currentIdx] = vertexId;
+      colourIndices[currentIdx] = coloursRequired;
+      faceRequiresColour = true;
+    } else if (nVertexPropertiesProvided == 2) {
+      size_t vertexId;
+      size_t colourId;
+      chunkStream >> vertexId >> colourId;
+      vertexId--;
+      colourId--;
+      vertexIndices[currentIdx] = vertexId;
+      colourIndices[currentIdx] = colourId;
+    } else if (nVertexPropertiesProvided == 3) {
+      assert(false && "3 face properties not tested");
+    } else {
+      assert(false && "unsupported number of vertex parameters provided in face definition");
+    }
+    currentIdx++;
+  }
+  if (faceRequiresColour) {
+    coloursRequired++;
+  }
+  std::cerr << "building triangle" << std::endl;
+  Triangle tri(vertexIndices, textureCoordIndices, normalIndices, colourIndices);
+  triangles.push_back(tri);
+}
+
+void ObjLoader::parse_polygon_face(std::stringstream &ss, std::vector<Triangle> &triangles, size_t nVertices) {
+  bool faceRequiresColour = false;
+  std::string chunk;
+  std::vector<size_t> vertexIndices(nVertices);
+  std::vector<size_t> colourIndices(nVertices);
+  std::vector<size_t> normalIndices(nVertices);
+  std::vector<size_t> textureCoordIndices(nVertices);
+
+  size_t currentIdx = 0;
+  while (ss >> chunk) {
+    std::replace(chunk.begin(), chunk.end(), '/', ' ');
+    std::stringstream chunkStream(chunk);
+    size_t nVertexPropertiesProvided = find_n_stringstream_chunks(chunkStream);
+    if (nVertexPropertiesProvided == 1) {
+      // only vertex information is provided, no colour, texture or normal information given
+      size_t vertexId;
+      chunkStream >> vertexId;
+      vertexId--;
+      vertexIndices[currentIdx] = vertexId;
+      colourIndices[currentIdx] = coloursRequired;
+      faceRequiresColour = true;
+    } else if (nVertexPropertiesProvided == 2) {
+      size_t vertexId;
+      size_t colourId;
+      chunkStream >> vertexId >> colourId;
+      vertexId--;
+      colourId--;
+      vertexIndices[currentIdx] = vertexId;
+      colourIndices[currentIdx] = colourId;
+    } else if (nVertexPropertiesProvided == 3) {
+      assert(false && "3 face properties not tested");
+    } else {
+      assert(false && "unsupported number of vertex parameters provided in face definition");
+    }
+    currentIdx++;
+  }
+  if (faceRequiresColour) {
+    coloursRequired++;
+  }
+
+  // triangulation
+
+  std::cerr << "building triangle" << std::endl;
+  std::array<size_t, 3> vertexIndicesA({vertexIndices[0], vertexIndices[1], vertexIndices[2]});
+  std::array<size_t, 3> colourIndicesA({colourIndices[0], colourIndices[1], colourIndices[2]});
+  std::array<size_t, 3> normalIndicesA({normalIndices[0], normalIndices[1], normalIndices[2]});
+  std::array<size_t, 3> textureCoordIndicesA({textureCoordIndices[0], textureCoordIndices[1], textureCoordIndices[2]});
+  std::array<size_t, 3> vertexIndicesB({vertexIndices[0], vertexIndices[2], vertexIndices[3]});
+  std::array<size_t, 3> colourIndicesB({colourIndices[0], colourIndices[2], colourIndices[3]});
+  std::array<size_t, 3> normalIndicesB({normalIndices[0], normalIndices[2], normalIndices[3]});
+  std::array<size_t, 3> textureCoordIndicesB({textureCoordIndices[0], textureCoordIndices[2], textureCoordIndices[3]});
+  Triangle triA(vertexIndicesA, textureCoordIndicesA, normalIndicesA, colourIndicesA);
+  Triangle triB(vertexIndicesB, textureCoordIndicesB, normalIndicesB, colourIndicesB);
+  triangles.push_back(triA);
+  triangles.push_back(triB);
 }
