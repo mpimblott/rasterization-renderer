@@ -77,7 +77,7 @@ std::vector<Point3h> Camera::project_vertices(const std::vector<Point3h> &vertic
     return projected_vertices;
 }
 
-std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
+std::vector<float> Camera::build_img_buffer(const VertexColourDecorator &mesh) {
     std::vector<Point3h> projectedVertices = project_vertices(mesh.get_vertices());
     // for (auto &v : projectedVertices) {
     //     std::cerr << v << std::endl;
@@ -195,7 +195,7 @@ void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix,
     // std::cerr << ", raster space: " << out << std::endl;
 }
 
-void Camera::texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
+void Camera::texture_shader(const MeshBase &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
                             const Vec<float, 3> &c0, const Vec<float, 3> &c1, const Vec<float, 3> &c2, const float &z) {
     float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
     float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];

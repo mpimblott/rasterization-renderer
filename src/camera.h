@@ -31,10 +31,10 @@ class Camera {
     void set_fov(float angle);
     void set_pos(Point3 &pos);
     Point3 get_pos() const;
-    std::vector<float> build_img_buffer(const Mesh &mesh);
+    std::vector<float> build_img_buffer(const VertexColourDecorator &mesh);
     void vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix,
                        Point3h &out);
-    void texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
+    void texture_shader(const MeshBase &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,
                         const Vec<float, 3> &c0, const Vec<float, 3> &c1, const Vec<float, 3> &c2, const float &z);
     void set_look_at(const Point3h &position, const Point3h &focus, const Vec3h &arbUp);
 

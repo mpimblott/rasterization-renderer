@@ -18,13 +18,13 @@ using std::unique_ptr;
 
 class MeshLoader {
  public:
-  virtual shared_ptr<Mesh> load(const char *file) = 0;
+  virtual shared_ptr<VertexColourDecorator> load(const char *file) = 0;
 };
 
 class ObjLoader : MeshLoader {
  public:
   ObjLoader();
-  shared_ptr<Mesh> load(const char *file);
+  shared_ptr<VertexColourDecorator> load(const char *file);
 
  private:
   void initRNG();

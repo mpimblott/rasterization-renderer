@@ -7,7 +7,7 @@ void ObjLoader::initRNG() {
   dis = std::uniform_real_distribution<>(0.0, 1.0);
 }
 
-shared_ptr<Mesh> ObjLoader::load(const char *file) {
+shared_ptr<VertexColourDecorator> ObjLoader::load(const char *file) {
   std::ifstream ifs;
   try {
     // read the input line by line
@@ -64,9 +64,11 @@ shared_ptr<Mesh> ObjLoader::load(const char *file) {
       compute_rough_normals(*triangles, *vertices, *normals);
     }
 
-    shared_ptr<Mesh> mesh_out = make_shared<Mesh>(Mesh(std::move(triangles), std::move(vertices), 
-                                                       std::move(textureCoordinates), std::move(vertexColours)));
-    return mesh_out;
+    shared_ptr<MeshData> data = make_shared<MeshData>(std::move(triangles), std::move(vertices));
+    unique_ptr<Mesh> mesh = make_unique<Mesh>(data);
+    unique_ptr<VertexColourDecorator> vertexColourDec =
+        make_unique<VertexColourDecorator>(data, std::move(mesh), std::move(vertexColours));
+    return vertexColourDec;
   } catch (...) {
     ifs.close();
     assert(false && "Error reading mesh file.");
@@ -118,7 +120,7 @@ void ObjLoader::compute_rough_normals(std::vector<Triangle> &triangles, const st
                                       std::vector<Point3h> &normals) {
   for (size_t i = 0; i < triangles.size(); i++) {
     normals[i] = triangles[i].normal(vertices);
-  std::cerr << "computed normal: " << normals[i] << std::endl;
+    std::cerr << "computed normal: " << normals[i] << std::endl;
   }
 }
 
