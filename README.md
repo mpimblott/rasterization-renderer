@@ -7,17 +7,17 @@ This is a renderer for displaying 3D graphics. A project to learn about 3D graph
 
 ## Implementation Specifics
 
-support for:
+Support for:
  - loading and displaying .obj files
  - arbitrary camera positioning using lookat
  - output to .ppm file
 
-to do:
+To Do:
  - lighting
  - materials
 
-properties:
+Properties:
  - Row-major matrices
  - Right-handed coordinate system
 
-Certain example meshes from https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
+Example meshes from https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
