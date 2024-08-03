@@ -79,9 +79,9 @@ std::vector<Point3h> Camera::project_vertices(const std::vector<Point3h> &vertic
 
 std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
     std::vector<Point3h> projectedVertices = project_vertices(mesh.get_vertices());
-    for (auto &v : projectedVertices) {
-        std::cerr << v << std::endl;
-    }
+    // for (auto &v : projectedVertices) {
+    //     std::cerr << v << std::endl;
+    // }
     // screen buffers
     std::vector<float> buffer(pixelWidth * pixelHeight * 3);
     std::vector<float> depthBuffer(pixelWidth * pixelHeight, std::numeric_limits<float>::max());
@@ -90,11 +90,11 @@ std::vector<float> Camera::build_img_buffer(const Mesh &mesh) {
     const size_t nFaces = mesh.get_n_faces();
     std::cerr << "mesh has " << nFaces << " faces." << std::endl;
     for (size_t f = 0; f < nFaces; f++) {
-        std::cerr << "processing face " << f << ", ";
-        std::cerr << "face has " << mesh.get_triangle(f).nVertices << " vertices: ";
+        // std::cerr << "processing face " << f << ", ";
+        // std::cerr << "face has " << mesh.get_triangle(f).nVertices << " vertices: ";
         const size_t startVertIdx = f * 3;  // 3 vertices in a triangle
         const Triangle &triangle = mesh.get_triangle(f);
-        std::cerr << triangle.vertexIndices[0] << ", " << triangle.vertexIndices[1] << ", " << triangle.vertexIndices[2] << std::endl;
+        // std::cerr << triangle.vertexIndices[0] << ", " << triangle.vertexIndices[1] << ", " << triangle.vertexIndices[2] << std::endl;
         const Point3h &p0 = projectedVertices[triangle.vertexIndices[0]];
         const Point3h &p1 = projectedVertices[triangle.vertexIndices[1]];
         const Point3h &p2 = projectedVertices[triangle.vertexIndices[2]];
@@ -183,17 +183,16 @@ inline std::tuple<size_t, size_t, size_t, size_t> Camera::triangle_raster_bbox(c
 
 void Camera::vertex_shader(const Point3h &vertex, const Matf4 &projectionMatrix, const Matf4 &worldToCameraMatrix,
                            Point3h &out) {
-    // std::cerr << "shader" << std::endl;
-    std::cerr << "Point: " << vertex;
+    // std::cerr << "Point: " << vertex;
     out = vertex * worldToCameraMatrix;
-    std::cerr << ", cam space: " << out;
+    // std::cerr << ", cam space: " << out;
     out = out * projectionMatrix;
-    std::cerr << ", NDC space: " << out;
+    // std::cerr << ", NDC space: " << out;
     // if (out.x() < -1 || out.x() > 1 || out.y() < -1 || out.y() > 1) return;
     // convert to raster space
     out.x() = (uint32_t)((out.x() + 1) * 0.5 * pixelWidth);
     out.y() = (uint32_t)((1 - (out.y() + 1) * 0.5) * pixelHeight);
-    std::cerr << ", raster space: " << out << std::endl;
+    // std::cerr << ", raster space: " << out << std::endl;
 }
 
 void Camera::texture_shader(const Mesh &mesh, ColourRGBA &out, const float &w0, const float &w1, const float &w2,

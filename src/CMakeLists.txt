@@ -11,7 +11,6 @@ add_executable(
   camera.cpp
   geometry.cpp
   ppm.cpp
-  geom_util.cpp
   obj.cpp
   )
   

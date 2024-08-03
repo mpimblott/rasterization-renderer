@@ -26,10 +26,10 @@ std::ostream &operator<<(std::ostream &os, const Mesh &mesh) {
   for (size_t i = 0; i < mesh.vertices->size(); i++) {
     os << (*mesh.vertices)[i] << ", ";
   }
-  os << "\nnormals: \n";
-  for (size_t i = 0; i < mesh.normals->size(); i++) {
-    os << (*mesh.normals)[i] << ", ";
-  }
+  // os << "\nnormals: \n";
+  // for (size_t i = 0; i < mesh.normals->size(); i++) {
+  //   os << (*mesh.normals)[i] << ", ";
+  // }
   os << "\ntexCoords: \n";
   for (size_t i = 0; i < mesh.textureCoordinates->size(); i++) {
     os << (*mesh.textureCoordinates)[i].u << ", " << (*mesh.textureCoordinates)[i].v << ", ";
@@ -44,6 +44,10 @@ std::ostream &operator<<(std::ostream &os, const Mesh &mesh) {
   }
   os << "]";
   return os;
+}
+
+Vec3h Triangle::normal(const std::vector<Point3h> &vertexData) const {
+  return cross(vertexData[vertexIndices[0]], vertexData[vertexIndices[1]]).normalise();
 }
 
 const size_t Mesh::get_n_faces() const { return triangles->size(); }
@@ -66,11 +70,9 @@ const Point3h &Mesh::get_vertex(size_t i) const {
 }
 
 Mesh::Mesh(unique_ptr<std::vector<Triangle>> triangles, unique_ptr<std::vector<Point3h>> vertices,
-           unique_ptr<std::vector<Point3h>> normals, unique_ptr<std::vector<TextureCoord>> textureCoordinates,
-           unique_ptr<std::vector<ColourRGB>> vertexColours)
+           unique_ptr<std::vector<TextureCoord>> textureCoordinates, unique_ptr<std::vector<ColourRGB>> vertexColours)
     : triangles(std::move(triangles)),
       vertices(std::move(vertices)),
-      normals(std::move(normals)),
       textureCoordinates(std::move(textureCoordinates)),
       vertexColours(std::move(vertexColours)) {}
 

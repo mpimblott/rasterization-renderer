@@ -40,5 +40,6 @@ class ObjLoader : MeshLoader {
   std::random_device rd;
   std::mt19937 gen;
   std::uniform_real_distribution<> dis;
-  void compute_smooth_normals(std::vector<Triangle> &triangles, const std::vector<Vertex> &vertices);
+  void compute_rough_normals(std::vector<Triangle> &triangles, const std::vector<Vertex> &vertices,
+                             std::vector<Point3h> &normals);
 };

@@ -2,7 +2,6 @@
 #include <memory>
 
 #include "camera.h"
-#include "geom_util.h"
 #include "geometry.h"
 #include "point.h"
 #include "vector.h"
@@ -10,8 +9,8 @@
 
 using std::shared_ptr;
 
-#define WIDTH 700
-#define HEIGHT 700
+#define WIDTH 600
+#define HEIGHT 600
 
 int main() {
     Camera cam(WIDTH, HEIGHT, 90, 1, 100);

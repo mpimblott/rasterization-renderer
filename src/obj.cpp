@@ -17,10 +17,7 @@ shared_ptr<Mesh> ObjLoader::load(const char *file) {
     ss << ifs.rdbuf();
     std::string line;
 
-    bool autoColourFaces = false;
-
     unique_ptr<std::vector<Point3h>> vertices = make_unique<std::vector<Point3h>>();
-    unique_ptr<std::vector<Point3h>> normals = make_unique<std::vector<Point3h>>();
     unique_ptr<std::vector<TextureCoord>> textureCoordinates = make_unique<std::vector<TextureCoord>>();
     unique_ptr<std::vector<ColourRGB>> vertexColours = make_unique<std::vector<ColourRGB>>();
     unique_ptr<std::vector<Triangle>> triangles = make_unique<std::vector<Triangle>>();
@@ -62,11 +59,12 @@ shared_ptr<Mesh> ObjLoader::load(const char *file) {
       coloursRequired = 0;
     }
 
+    unique_ptr<std::vector<Point3h>> normals = make_unique<std::vector<Point3h>>(triangles->size());
     if (computeSmoothNormals) {
-      compute_smooth_normals(*triangles, *vertices);
+      compute_rough_normals(*triangles, *vertices, *normals);
     }
 
-    shared_ptr<Mesh> mesh_out = make_shared<Mesh>(Mesh(std::move(triangles), std::move(vertices), std::move(normals),
+    shared_ptr<Mesh> mesh_out = make_shared<Mesh>(Mesh(std::move(triangles), std::move(vertices), 
                                                        std::move(textureCoordinates), std::move(vertexColours)));
     return mesh_out;
   } catch (...) {
@@ -110,13 +108,19 @@ void ObjLoader::parse_face(std::stringstream &ss, std::vector<Triangle> &triangl
 Point3h ObjLoader::parse_vertex(std::stringstream &ss) {
   Point3h vertex;
   ss >> vertex.x() >> vertex.y() >> vertex.z();
-  std::cerr << "v: " << vertex << std::endl;
+  // std::cerr << "v: " << vertex << std::endl;
   return vertex;
 }
 
 ColourRGB ObjLoader::random_colour() { return ColourRGB({(float)dis(gen), (float)dis(gen), (float)dis(gen)}); }
 
-void ObjLoader::compute_smooth_normals(std::vector<Triangle> &triangles, const std::vector<Vertex> &vertices) {}
+void ObjLoader::compute_rough_normals(std::vector<Triangle> &triangles, const std::vector<Vertex> &vertices,
+                                      std::vector<Point3h> &normals) {
+  for (size_t i = 0; i < triangles.size(); i++) {
+    normals[i] = triangles[i].normal(vertices);
+  std::cerr << "computed normal: " << normals[i] << std::endl;
+  }
+}
 
 void ObjLoader::parse_triangle_face(std::stringstream &ss, std::vector<Triangle> &triangles) {
   bool faceRequiresColour = false;
@@ -157,7 +161,6 @@ void ObjLoader::parse_triangle_face(std::stringstream &ss, std::vector<Triangle>
   if (faceRequiresColour) {
     coloursRequired++;
   }
-  std::cerr << "building triangle" << std::endl;
   Triangle tri(vertexIndices, textureCoordIndices, normalIndices, colourIndices);
   triangles.push_back(tri);
 }
@@ -203,8 +206,6 @@ void ObjLoader::parse_polygon_face(std::stringstream &ss, std::vector<Triangle> 
   }
 
   // triangulation
-
-  std::cerr << "building triangle" << std::endl;
   std::array<size_t, 3> vertexIndicesA({vertexIndices[0], vertexIndices[1], vertexIndices[2]});
   std::array<size_t, 3> colourIndicesA({colourIndices[0], colourIndices[1], colourIndices[2]});
   std::array<size_t, 3> normalIndicesA({normalIndices[0], normalIndices[1], normalIndices[2]});
