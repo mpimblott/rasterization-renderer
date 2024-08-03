@@ -17,3 +17,5 @@ to do:
 properties:
  - Row-major matrices
  - Right-handed coordinate system
+
+Certain example meshes from https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
