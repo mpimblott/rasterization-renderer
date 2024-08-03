@@ -20,4 +20,12 @@ Properties:
  - Row-major matrices
  - Right-handed coordinate system
 
+## Building and dependencies
+
+Use CMake to build, no external dependencies required.
+
+## License
+
+This project uses the MIT licence.
+
 Example meshes from https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
